@@ -48,7 +48,8 @@ async function uploadAllFiles(token) {
     const { valid, best, score, errorMessage } = await waitForScoring(
       round.id,
       submitResponse.id,
-      dataSet.name
+      dataSet.name,
+      token
     );
     if (!valid) {
       log(`error for ${dataSet.name}: ${errorMessage}`);
@@ -92,7 +93,7 @@ async function uploadFile(filepath, token) {
  * @param {{ id: unknown }} submission
  * @param {string} dataSetName
  */
-async function waitForScoring(roundId, submission, dataSetName) {
+async function waitForScoring(roundId, submission, dataSetName, token) {
   while (true) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     log(`polling score for ${dataSetName}`);
