@@ -54,7 +54,7 @@ async function httpError(res, url, requestOptions) {
     new Error(`Errors in HTTP response from ${url.toString()}`),
     {
       url: url.toString(),
-      method: requestOptions.method,
+      method: requestOptions.method || "GET",
       statusCode: res.statusCode,
       statusMessage: res.statusMessage,
       body,
