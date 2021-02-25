@@ -2,6 +2,11 @@
   "name": "@hgwood/petibrugnon",
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "bru-submit": "./src/submit.js",
+    "bru-download": "./src/download.js",
+    "bru-login": "./src/login.js"
+  },
   "dependencies": {
     "archiver": "5.2.0",
     "debug": "4.3.1",
