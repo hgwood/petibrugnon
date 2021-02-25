@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as childProcess from "child_process";
 import archiver from "archiver";
-import glob from "glob";
 
 const SUBMISSIONS_DIR =
   process.env.PETIBRUGNON_SUBMISSIONS_DIR || ".petibrugnon/submissions";
@@ -22,10 +21,10 @@ try {
   if (err.code !== "EEXIST") throw err;
 }
 
-const files = glob.sync("!(node_modules)", {});
+const gitignore = fs.readFileSync(".gitignore").toString();
 const archive = archiver("zip");
-files.forEach((file) => archive.file(file, { name: path.basename(file) }));
+archive.glob("**", { ignore: gitignore.split("\n") });
 archive.pipe(fs.createWriteStream(zipPath));
 archive.finalize().then(() => {
-  console.log(`wrote ${files.length} files to ${zipPath}`);
+  console.log(`zip files to ${zipPath}`);
 });

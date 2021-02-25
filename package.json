@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "archiver": "5.2.0",
-    "glob": "7.1.6"
+    "archiver": "5.2.0"
   },
   "devDependencies": {
     "@types/archiver": "5.1.0",
