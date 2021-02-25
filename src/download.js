@@ -23,6 +23,9 @@ const DATA_SETS_DIR = path.resolve(
 async function download() {
   const token = gcloud.fetchToken();
   const round = await fetchRound(token);
+  if (!round) {
+    throw new Error("There are no open rounds right now!");
+  }
   fs.mkdirSync(path.dirname(ROUND_FILE), { recursive: true });
   fs.writeFileSync(ROUND_FILE, JSON.stringify(round, null, 2));
   const problemStatement = await fetchDownload(round.problemBlobKey, token);
