@@ -1,3 +1,6 @@
+import * as util from "util";
+import * as stream from "stream";
+
 /**
  *
  * @param {AsyncIterable<Buffer>} readable
@@ -9,3 +12,5 @@ export async function parseAsText(readable) {
   }
   return content;
 }
+
+export const pipeline = util.promisify(stream.pipeline);

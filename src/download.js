@@ -1,17 +1,38 @@
-import * as fs from "fs";
+import fs from "fs";
+import path from "path";
 import * as gcloud from "./gcloud.js";
+import { composeFsFriendlyName } from "./utils/fs.js";
 import { httpRequest } from "./utils/httpClient.js";
-import { parseAsText } from "./utils/streams.js";
+import { parseAsText, pipeline } from "./utils/streams.js";
+
+const ROUND_FILE = path.resolve(
+  process.env.PETIBRUGNON_ROUND_FILE || "./.petibrugnon/round.json"
+);
+
+const PROBEM_STATEMENT_FILE = path.resolve(
+  process.env.PETIBRUGNON_PROBEM_STATEMENT_FILE ||
+    "./.petibrugnon/problem_statement.pdf"
+);
+
+const DATA_SETS_DIR = path.resolve(
+  process.env.PETIBRUGNON_DATA_SETS_DIR || "./.petibrugnon/data_sets"
+);
 
 async function download() {
   const token = gcloud.fetchToken();
   const round = await fetchRound(token);
+  fs.mkdirSync(path.dirname(ROUND_FILE), { recursive: true });
+  fs.writeFileSync(ROUND_FILE, JSON.stringify(round, null, 2));
   const problemStatement = await fetchDownload(round.problemBlobKey, token);
-  problemStatement.pipe(fs.createWriteStream("./problem_statement.pdf"));
-  round.dataSets.forEach(async (dataSet) => {
+  fs.mkdirSync(path.dirname(PROBEM_STATEMENT_FILE), { recursive: true });
+  await pipeline(problemStatement, fs.createWriteStream(PROBEM_STATEMENT_FILE));
+  fs.mkdirSync(DATA_SETS_DIR, { recursive: true });
+  for (const dataSet of round.dataSets) {
     const response = await fetchDownload(dataSet.inputBlobKey, token);
-    response.pipe(fs.createWriteStream(`./${dataSet.name}.txt`));
-  });
+    const fileName = composeFsFriendlyName(dataSet.name).toLowerCase();
+    const filePath = path.join(DATA_SETS_DIR, `./${fileName}.txt`);
+    await pipeline(response, fs.createWriteStream(filePath));
+  }
 }
 
 /**
@@ -49,4 +70,4 @@ async function fetchDownload(blobKey, token) {
   );
 }
 
-download();
+download().catch(console.error);
