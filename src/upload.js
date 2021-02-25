@@ -45,19 +45,6 @@ async function uploadAllFiles(token) {
       qs: { dataSet: dataSet.id, submissionBlobKey: blobKey, sourcesBlobKey },
       json: true,
     });
-    const { valid, best, score, errorMessage } = await waitForScoring(
-      round.id,
-      submitResponse.id,
-      dataSet.name,
-      token
-    );
-    if (!valid) {
-      log(`error for ${dataSet.name}: ${errorMessage}`);
-    } else if (best) {
-      log(`NEW RECORD for ${dataSet.name}: ${score}`);
-    } else {
-      log(`got score for ${dataSet.name}: ${score}`);
-    }
   }
 }
 
@@ -85,35 +72,6 @@ async function uploadFile(filepath, token) {
   });
   const blobKey = uploadResponse.file[0];
   return blobKey;
-}
-
-/**
- *
- * @param {unknown} roundId
- * @param {{ id: unknown }} submission
- * @param {string} dataSetName
- */
-async function waitForScoring(roundId, submission, dataSetName, token) {
-  while (true) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    log(`polling score for ${dataSetName}`);
-    const { items: submissions } = await requestPromise({
-      method: "GET",
-      uri: `https://hashcode-judge.appspot.com/api/judge/v1/submissions/${roundId}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      json: true,
-    });
-    const scoredSubmission = submissions.find(
-      (sub) => sub.id === submission.id && sub.scored === true
-    );
-    if (scoredSubmission) {
-      return scoredSubmission;
-    } else {
-      log(`no score yet for ${dataSetName}`);
-    }
-  }
 }
 
 function fetchLatestSourcePackage() {
