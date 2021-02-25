@@ -25,7 +25,7 @@ export function httpRequest(url, options, body) {
   return new Promise((resolve, reject) => {
     const httpModule = url.toString().startsWith("https") ? https : http;
     const req = httpModule.request(url, effectiveOptions, async (res) => {
-      const statusCode = res.statusCode ?? 0;
+      const statusCode = res.statusCode || 0;
       log(`${req.method} ${url} => ${statusCode}`);
       if (statusCode >= 200 && statusCode < 400) {
         resolve(res);
