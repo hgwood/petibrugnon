@@ -1,7 +1,9 @@
 import fs from "fs";
 import path from "path";
+import querystring from "querystring";
 import requestPromise from "request-promise";
 import debug from "debug";
+import FormData from "form-data";
 import { fetchToken } from "./gcloud.js";
 import { composeFsFriendlyName } from "./utils/fs.js";
 import { httpRequest } from "./utils/httpClient.js";
@@ -36,15 +38,24 @@ async function uploadAllFiles(token) {
       composeFsFriendlyName(dataSet.name).toLowerCase() + ".out.txt"
     );
     const blobKey = await uploadFile(solutionFile, token);
-    const submitResponse = await requestPromise({
-      method: "POST",
-      uri: "https://hashcode-judge.appspot.com/api/judge/v1/submissions",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      qs: { dataSet: dataSet.id, submissionBlobKey: blobKey, sourcesBlobKey },
-      json: true,
+    console.log(blobKey)
+    return;
+    const query = querystring.stringify({
+      dataSet: dataSet.id,
+      submissionBlobKey: blobKey,
+      sourcesBlobKey,
     });
+    const submitResponse = await httpRequest(
+      `https://hashcode-judge.appspot.com/api/judge/v1/submissions?${query}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const json = JSON.parse(await parseAsText(submitResponse));
+    console.log(json);
   }
 }
 
@@ -63,13 +74,19 @@ async function uploadFile(filepath, token) {
     }
   );
   const { value: uploadUrl } = JSON.parse(await parseAsText(createUrlResponse));
-  const formData = { file: fs.createReadStream(filepath) };
-  const uploadResponse = await requestPromise({
-    method: "POST",
-    uri: uploadUrl,
-    formData,
-    json: true,
-  });
+  const formData = new FormData();
+  const content = fs.readFileSync(filepath).toString()
+  formData.append("file", content, filepath);
+  console.log(formData.getHeaders(), formData.getBuffer(), content)
+  const response = await httpRequest(
+    uploadUrl,
+    {
+      method: "POST",
+      headers: formData.getHeaders(),
+    },
+    formData.getBuffer()
+  );
+  const uploadResponse = JSON.parse(await parseAsText(response));
   const blobKey = uploadResponse.file[0];
   return blobKey;
 }
@@ -84,3 +101,5 @@ export async function upload() {
   const token = fetchToken();
   await uploadAllFiles(token);
 }
+
+upload().catch(console.error)
