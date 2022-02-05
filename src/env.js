@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync, rmSync } from "fs";
 import * as path from "path";
 import parseIgnoreFile from "parse-gitignore";
 import assert from "assert";
@@ -15,6 +15,10 @@ const statementFile = path.resolve(stashDirectory, "statement.html");
 const inputsDirectory = path.resolve(stashDirectory, "inputs");
 const outputsDirectory = path.resolve(stashDirectory, "outputs");
 const metaFile = path.resolve(stashDirectory, "meta.json");
+const inputToTestMappingFile = path.resolve(
+  stashDirectory,
+  "inputToTestMapping.json"
+);
 const credentialsFile = path.resolve(stashDirectory, "credentials.json");
 
 function parseMetaFile() {
@@ -56,6 +60,7 @@ function parseCredentialsFile() {
           credentialsFile
         )}' exists but token has expired. You are now logged out.`
       );
+      rmSync(credentialsFile);
       return null;
     }
   } catch (err) {
@@ -66,6 +71,7 @@ function parseCredentialsFile() {
         )}' exists but cannot be parsed. You are now logged out.`
       );
     }
+    rmSync(credentialsFile);
     return null;
   }
 }
@@ -85,6 +91,7 @@ export default {
     inputs: inputsDirectory,
     outputs: outputsDirectory,
     meta: metaFile,
+    inputToTestMapping: inputToTestMappingFile,
     credentials: credentialsFile,
     ignore: parseIgnoreFiles(),
     relative: {
@@ -100,5 +107,8 @@ export default {
     challengeId: meta?.id,
     taskId: meta?.tasks[0].id,
   },
+  inputToTestMapping: JSON.parse(
+    readFileSync(inputToTestMappingFile).toString()
+  ),
   token: parseCredentialsFile(),
 };

@@ -16,29 +16,40 @@ export function fetchAdventures() {
  * @param {string} id
  * @returns {Promise<any>}
  */
-export function fetchChallenge(id) {
+export function fetchChallenge(id, accessToken) {
   assert.ok(id, "id is required");
   return fetchJson(
-    `https://codejam.googleapis.com/dashboard/${id}/poll?${encodeGetQuery({})}`
+    `https://codejam.googleapis.com/dashboard/${id}/poll?${encodeGetQuery({})}`,
+    {
+      headers: {
+        authorization: accessToken && `Bearer ${accessToken}`,
+      }
+    }
   );
 }
 
-export function fetchChallengeScores(challengeId) {
+export function fetchChallengeScores(challengeId, accessToken) {
   const query = encodeGetQuery({ include_non_final_results: true });
   return fetchJson(
-    `https://codejam.googleapis.com/attempts/${challengeId}/poll?${query}`
+    `https://codejam.googleapis.com/attempts/${challengeId}/poll?${query}`,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
   );
 }
 
 export async function uploadOutput(
   challengeId,
   taskId,
+  testId,
   outputFile,
   codeFile,
   accessToken
 ) {
   const form = new FormData();
-  form.set("p", base64UrlEncodedJson.encode({ task_id: taskId, for_test: 0 }));
+  form.set("p", base64UrlEncodedJson.encode({ task_id: taskId, for_test: testId }));
   form.set("outputFile", await fileFromPath(outputFile));
   form.set("codeFile", await fileFromPath(codeFile));
   const encoder = new FormDataEncoder(form);

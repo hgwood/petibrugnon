@@ -29,18 +29,24 @@ async function upload() {
   await mkdir(env.paths.outputs, { recursive: true });
   const outputFileNames = await readdir(env.paths.outputs);
   for (const outputFileName of outputFileNames) {
+    const testId = env.inputToTestMapping[outputFileName];
+    if (testId === undefined) {
+      console.warn(
+        `[petibrugnon] [WARN] Cannot find a test matching the output file '${outputFileName}'. This file will not be uploaded.`
+      );
+      continue;
+    }
     await uploadOutput(
       challengeId,
       taskId,
+      testId,
       path.resolve(env.paths.outputs, outputFileName),
       env.paths.sourcesZip,
       env.token
     );
+    const logPath = path.join(env.paths.relative.outputs, outputFileName);
     console.log(
-      `[petibrugnon] Uploaded output ${path.join(
-        env.paths.relative.outputs,
-        outputFileName
-      )}`
+      `[petibrugnon] Uploaded output '${logPath}' for test '${testId}'`
     );
   }
 }
