@@ -16,6 +16,9 @@ export async function download() {
   const { challenge } = await fetchChallenge(challengeId, env.token);
   await writeFile(env.paths.meta, JSON.stringify(challenge, null, 2));
   const task = challenge.tasks[0];
+  console.log(
+    `[petibrugnon] Currently opened challenge is: '${challenge.title}' - '${task.title}'`
+  );
   await writeFile(env.paths.statement, task.statement);
   console.log(
     `[petibrugnon] Downloaded statement to '${env.paths.relative.statement}'`
