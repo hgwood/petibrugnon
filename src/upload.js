@@ -1,4 +1,3 @@
-import * as assert from "assert";
 import { mkdir, readdir } from "fs/promises";
 import * as path from "path";
 import { inspect } from "util";
@@ -6,12 +5,12 @@ import { uploadOutput } from "./codeJamApiClient.js";
 import env from "./env.js";
 import glob from "./wrappers/glob.js";
 import { zip } from "./utils/zip.js";
+import { login } from "./login.js";
 
 async function upload() {
-  assert.ok(
-    env.token,
-    "token required for upload, bot none found in env var PETIBRUGNON_TOKEN"
-  );
+  if (!env.token) {
+    await login();
+  }
   const sourceFiles = await glob("**", {
     ignore: env.paths.ignore,
     cwd: env.paths.project,

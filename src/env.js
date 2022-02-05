@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import * as path from "path";
 import parseIgnoreFile from "parse-gitignore";
+import assert from "assert";
 
 const projectDirectory = path.resolve(".");
 const gitginoreFile = path.resolve(projectDirectory, ".gitignore");
@@ -14,6 +15,7 @@ const statementFile = path.resolve(stashDirectory, "statement.html");
 const inputsDirectory = path.resolve(stashDirectory, "inputs");
 const outputsDirectory = path.resolve(stashDirectory, "outputs");
 const metaFile = path.resolve(stashDirectory, "meta.json");
+const credentialsFile = path.resolve(stashDirectory, "credentials.json");
 
 function parseMetaFile() {
   try {
@@ -34,6 +36,40 @@ function parseIgnoreFiles() {
   }
 }
 
+function parseCredentialsFile() {
+  try {
+    const credentials = JSON.parse(readFileSync(credentialsFile).toString());
+    assert.ok(
+      credentials.expiry_date,
+      "expiry_date missing in credentials file"
+    );
+    assert.ok(
+      credentials.access_token,
+      "access_token missing in credentials file"
+    );
+    if (new Date() <= new Date(credentials.expiry_date)) {
+      console.log(`[petibrugnon] [INFO] Logged in using cached credentials`);
+      return credentials.access_token;
+    } else {
+      console.warn(
+        `[petibrugnon] [INFO] Credentials file at '${relative(
+          credentialsFile
+        )}' exists but token has expired. You are now logged out.`
+      );
+      return null;
+    }
+  } catch (err) {
+    if (err.code !== "ENOENT") {
+      console.warn(
+        `[petibrugnon] [WARN] Credentials file at '${relative(
+          credentialsFile
+        )}' exists but cannot be parsed. You are now logged out.`
+      );
+    }
+    return null;
+  }
+}
+
 function relative(filePath) {
   return path.relative(projectDirectory, filePath);
 }
@@ -49,6 +85,7 @@ export default {
     inputs: inputsDirectory,
     outputs: outputsDirectory,
     meta: metaFile,
+    credentials: credentialsFile,
     ignore: parseIgnoreFiles(),
     relative: {
       sourcesZip: relative(sourcesZipFile),
@@ -56,11 +93,12 @@ export default {
       inputs: relative(inputsDirectory),
       outputs: relative(outputsDirectory),
       meta: relative(metaFile),
+      credentials: relative(credentialsFile),
     },
   },
   meta: {
     challengeId: meta?.id,
     taskId: meta?.tasks[0].id,
   },
-  token: process.env.PETIBRUGNON_TOKEN,
+  token: parseCredentialsFile(),
 };
