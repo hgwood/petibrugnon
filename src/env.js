@@ -106,6 +106,7 @@ export default {
   meta: {
     challengeId: meta?.id,
     taskId: meta?.tasks[0].id,
+    competitorId: meta?.ticket.competitor.id,
   },
   inputToTestMapping: JSON.parse(
     readFileSync(inputToTestMappingFile).toString()

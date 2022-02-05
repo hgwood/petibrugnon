@@ -23,7 +23,7 @@ export function fetchChallenge(id, accessToken) {
     {
       headers: {
         authorization: accessToken && `Bearer ${accessToken}`,
-      }
+      },
     }
   );
 }
@@ -32,6 +32,21 @@ export function fetchChallengeScores(challengeId, accessToken) {
   const query = encodeGetQuery({ include_non_final_results: true });
   return fetchJson(
     `https://codejam.googleapis.com/attempts/${challengeId}/poll?${query}`,
+    {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+}
+
+export function fetchScoreboard(challengeId, accessToken) {
+  const query = encodeGetQuery({
+    min_rank: 1,
+    num_consecutive_users: 1,
+  });
+  return fetchJson(
+    `https://codejam.googleapis.com/scoreboard/${challengeId}/poll?${query}`,
     {
       headers: {
         authorization: `Bearer ${accessToken}`,
@@ -49,7 +64,10 @@ export async function uploadOutput(
   accessToken
 ) {
   const form = new FormData();
-  form.set("p", base64UrlEncodedJson.encode({ task_id: taskId, for_test: testId }));
+  form.set(
+    "p",
+    base64UrlEncodedJson.encode({ task_id: taskId, for_test: testId })
+  );
   form.set("outputFile", await fileFromPath(outputFile));
   form.set("codeFile", await fileFromPath(codeFile));
   const encoder = new FormDataEncoder(form);
