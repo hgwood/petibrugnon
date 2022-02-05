@@ -8,7 +8,7 @@ import events from "events";
  * @param {string} eventName
  * @param {string} endEventName
  */
-export async function* onUntil(emitter, eventName, endEventName) {
+export async function* onEventUntil(emitter, eventName, endEventName) {
   const abort = new AbortController();
   const iterator = events.on(emitter, eventName, { signal: abort.signal });
   emitter.once(endEventName, () => {

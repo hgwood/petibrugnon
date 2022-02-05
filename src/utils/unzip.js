@@ -2,7 +2,7 @@ import { createWriteStream } from "fs";
 import { mkdir } from "fs/promises";
 import * as path from "path";
 import { pipeline } from "stream/promises";
-import { onUntil } from "./onUntil.js";
+import { onEventUntil } from "./onEventUntil.js";
 import { zipFileFromBuffer } from "../wrappers/yauzl.js";
 
 /**
@@ -17,7 +17,7 @@ import { zipFileFromBuffer } from "../wrappers/yauzl.js";
 export async function unzip(inputBuffer, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const zipFile = await zipFileFromBuffer(inputBuffer);
-  for await (const [entry] of onUntil(zipFile, "entry", "end")) {
+  for await (const [entry] of onEventUntil(zipFile, "entry", "end")) {
     await pipeline(
       await zipFile.openReadStream(entry),
       createWriteStream(path.join(outputDirectory, entry.fileName))
