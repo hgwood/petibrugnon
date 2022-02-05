@@ -48,9 +48,10 @@ export async function uploadOutput(
       method: "POST",
       headers: {
         ...encoder.headers,
-        authorization: accessToken,
+        authorization: `Bearer ${accessToken}`,
       },
       body: Readable.from(encoder.encode()),
+      redirect: "manual",
     }
   );
 }
@@ -71,7 +72,7 @@ async function fetchJson(input, init) {
   const response = await fetch(input, init);
   if (response.status !== 200) {
     //@ts-ignore
-    const text = await streamConsumers.text(response.body);
+    const text = response.body && (await streamConsumers.text(response.body));
     const status = `${response.status} ${response.statusText}`;
     throw new Error(`${init.method || "GET"} ${input} => ${status} ${text}`);
   }

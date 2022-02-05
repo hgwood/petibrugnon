@@ -1,12 +1,9 @@
-import * as events from "events";
 import { createWriteStream } from "fs";
 import { mkdir } from "fs/promises";
 import * as path from "path";
 import { pipeline } from "stream/promises";
-import { promisify } from "util";
-import * as yauzl from "yauzl";
-
-const zipFileFromBuffer = promisify(yauzl.fromBuffer);
+import { onUntil } from "./onUntil.js";
+import { zipFileFromBuffer } from "../wrappers/yauzl.js";
 
 /**
  * Unzips all files of a zip file into a directory. The output directory is
@@ -20,12 +17,11 @@ const zipFileFromBuffer = promisify(yauzl.fromBuffer);
 export async function unzip(inputBuffer, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const zipFile = await zipFileFromBuffer(inputBuffer);
-  const openReadStream = promisify(zipFile.openReadStream.bind(zipFile));
-  for await (const [entry] of events.on(zipFile, "entry")) {
+  // const openReadStream = promisify(zipFile.openReadStream.bind(zipFile));
+  for await (const [entry] of onUntil(zipFile, "entry", "end")) {
     await pipeline(
-      await openReadStream(entry),
+      await zipFile.openReadStream(entry),
       createWriteStream(path.join(outputDirectory, entry.fileName))
     );
   }
-  await events.once(zipFile, "end");
 }
