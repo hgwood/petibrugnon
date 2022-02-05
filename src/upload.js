@@ -12,7 +12,7 @@ async function upload() {
     await login();
   }
   const sourceFiles = await glob("**", {
-    ignore: env.paths.ignore,
+    ignore: [".petibrugnon/**"].concat(env.paths.ignore),
     cwd: env.paths.project,
     nodir: true,
   });
