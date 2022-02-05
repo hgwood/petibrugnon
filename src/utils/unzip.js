@@ -17,7 +17,6 @@ import { zipFileFromBuffer } from "../wrappers/yauzl.js";
 export async function unzip(inputBuffer, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const zipFile = await zipFileFromBuffer(inputBuffer);
-  // const openReadStream = promisify(zipFile.openReadStream.bind(zipFile));
   for await (const [entry] of onUntil(zipFile, "entry", "end")) {
     await pipeline(
       await zipFile.openReadStream(entry),
