@@ -28,9 +28,9 @@ export function fetchChallenge(id, accessToken) {
   );
 }
 
-export function fetchChallengeScores(challengeId, accessToken) {
+export async function fetchAttempts(challengeId, accessToken) {
   const query = encodeGetQuery({ include_non_final_results: true });
-  return fetchJson(
+  const { attempts } = await fetchJson(
     `https://codejam.googleapis.com/attempts/${challengeId}/poll?${query}`,
     {
       headers: {
@@ -38,6 +38,7 @@ export function fetchChallengeScores(challengeId, accessToken) {
       },
     }
   );
+  return attempts;
 }
 
 export function fetchScoreboard(challengeId, accessToken) {
