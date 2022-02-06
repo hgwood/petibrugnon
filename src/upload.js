@@ -46,7 +46,7 @@ async function upload() {
     );
     const logPath = path.join(env.paths.relative.outputs, outputFileName);
     console.log(
-      `[petibrugnon] Uploaded output '${logPath}' for test '${testId}'`
+      `[petibrugnon] Uploaded output '${logPath}' for test '${env.meta.tests[testId].name}'`
     );
   }
 }
