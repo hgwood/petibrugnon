@@ -22,10 +22,15 @@ ptbr --help
 
 ### Commands
 
-- `download`: download the current challenge statement and input files in `.petibrugnon`.
+- `download`: download the current challenge statement in
+  `.petibrugnon/statement.html` and input files in `.petibrugnon/inputs`.
 - `upload`: upload output files to the scoring app. All files located in
-  `.petibrugnon/outputs` will be uploaded. Output files must have the same name
-  as their corresponding input file.
-- `score`: display the total score, rank, and individual tests scores.
+  `.petibrugnon/outputs` that have the same name as an input file will be
+  uploaded as a solution for the corresponding test. Sources are also uploaded.
+  All files and directories from the working directory will be zipped and
+  uploaded, except those which match patterns found in `.gitignore`. If Git is
+  not used, a `.petibrugnonignore` file is also accepted. Also, the
+  `.petibrugnon` directory is always ignored.
+- `score`: display the total score, rank, and individual test scores.
 - `login`: log in to the scoring app. This automatically done by commands that require it.
 - `logout`: log out of the scoring app. Use it if you encounter errors.
