@@ -22,10 +22,10 @@ ptbr --help
 
 ### Commands
 
-- `login`: log in to the scoring app.
-- `logout`: log out of the scoring app.
 - `download`: download the current challenge statement and input files in `.petibrugnon`.
 - `upload`: upload output files to the scoring app. All files located in
   `.petibrugnon/outputs` will be uploaded. Output files must have the same name
   as their corresponding input file.
 - `score`: display the total score, rank, and individual tests scores.
+- `login`: log in to the scoring app. This automatically done by commands that require it.
+- `logout`: log out of the scoring app. Use it if you encounter errors.
