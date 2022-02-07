@@ -59,7 +59,10 @@ async function cacheUsingJsonFile(fn, path) {
     try {
       await fs.writeFile(path, JSON.stringify(result));
     } catch (err) {
-      console.warn("unable to write cache file", path, err);
+      console.warn(
+        `[petibrugnon] [WARN] Unable to write cache file at '${path}'`,
+        err
+      );
     }
     return result;
   }
@@ -87,9 +90,12 @@ async function acquireTokenUsingCliCode(oauth2Client, scopes) {
  * @returns {Promise<string>}
  */
 async function askForCodeThroughCli(authUrl) {
-  console.log("Authorize this app by visiting this url:", authUrl);
+  console.log(
+    "[petibrugnon] Authorize this program to access your Hash Code profile by visiting this url:\n",
+    authUrl
+  );
   const code = await askQuestionThroughCli(
-    "Enter the code from that page here: "
+    "[petibrugnon] Enter the code from that page here: "
   );
   return code;
 }
