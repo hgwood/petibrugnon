@@ -22,6 +22,7 @@ export async function upload() {
       sourceFiles,
       {
         maxArrayLength: 3,
+        breakLength: Infinity,
       }
     )}`
   );
