@@ -4,6 +4,7 @@ import { logout } from "./logout.js";
 import { download } from "./download.js";
 import { upload } from "./upload.js";
 import { score } from "./score.js";
+import { run } from "./run.js";
 
 yargs(process.argv.slice(2))
   .command(
@@ -44,6 +45,14 @@ yargs(process.argv.slice(2))
     (yargs) => {},
     async (argv) => {
       await score();
+    }
+  )
+  .command(
+    "run",
+    "",
+    (yargs) => {},
+    async (argv) => {
+      await run(argv);
     }
   )
   .demandCommand()
