@@ -45,6 +45,7 @@ export async function run(argv) {
   });
   await concurrently(commands, {
     prefix: "{time} [{name}]",
+    prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
     timestampFormat: "HH:mm:ss.SSS",
   }).result;
 }
