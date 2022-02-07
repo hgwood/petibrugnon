@@ -20,6 +20,7 @@ const inputToTestMappingFile = path.resolve(
   "inputToTestMapping.json"
 );
 const credentialsFile = path.resolve(stashDirectory, "credentials.json");
+const runSaveFile = path.resolve(stashDirectory, "runSaveFile.sh");
 
 function parseMetaFile() {
   try {
@@ -95,6 +96,7 @@ export default {
     inputToTestMapping: inputToTestMappingFile,
     credentials: credentialsFile,
     ignore: parseIgnoreFiles(),
+    runSave: runSaveFile,
     relative: {
       sourcesZip: relative(sourcesZipFile),
       statement: relative(statementFile),
