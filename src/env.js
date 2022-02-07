@@ -1,4 +1,4 @@
-import { readFileSync, rmSync } from "fs";
+import { mkdirSync, readFileSync, rmSync } from "fs";
 import * as path from "path";
 import parseIgnoreFile from "parse-gitignore";
 import assert from "assert";
@@ -80,6 +80,7 @@ function relative(filePath) {
   return path.relative(projectDirectory, filePath);
 }
 
+mkdirSync(stashDirectory, { recursive: true });
 const meta = parseMetaFile();
 
 export default {
