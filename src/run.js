@@ -5,6 +5,11 @@ import concurrently from "concurrently";
 import env from "./env.js";
 
 export async function run(argv) {
+  const testNames = Object.values(env.meta.tests).map(({ name }) => name);
+  const testNameMaxLength = testNames.reduce(
+    (maxLength, name) => Math.max(maxLength, name.length),
+    0
+  );
   const [, command, ...args] = argv._;
   const inputFileNames = await readdir(env.paths.inputs);
   console.log(
@@ -20,7 +25,7 @@ export async function run(argv) {
     const testName = env.meta.tests[testId].name;
     return {
       command: `${command} ${args.join(" ")}`,
-      name: testName,
+      name: testName.padEnd(testNameMaxLength),
       env: {
         PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, inputFileName),
         PETIBRUGNON_OUTPUT_FILE_PATH: path.join(
