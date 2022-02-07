@@ -1,6 +1,6 @@
 # petibrugnon
 
-A command-line interface to interact with the Hash Code scoring app (https://codingcompetitions.withgoogle.com/hashcode).
+A command-line interface to assist Google Hash Code participants. It can interact with the [Hash Code scoring app](https://codingcompetitions.withgoogle.com/hashcode).
 
 ## Install
 
