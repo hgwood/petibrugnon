@@ -49,7 +49,9 @@ export async function download() {
     await writeFile(inputPath, buffer);
     const relativeInputPath = path.join(env.paths.relative.inputs, fileName);
     console.log(
-      `[petibrugnon] Unzipped input of test '${inputToTestMapping[fileName]}' to '${relativeInputPath}'`
+      `[petibrugnon] Unzipped input of test '${
+        env.meta.tests[inputToTestMapping[fileName]].name
+      }' to '${relativeInputPath}'`
     );
   }
 }
