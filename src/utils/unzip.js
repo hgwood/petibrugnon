@@ -4,9 +4,7 @@ import { zipFileFromBuffer } from "../wrappers/yauzl.js";
 import asyncMap from "./asyncMap.js";
 
 /**
- * Unzips all files of a zip file into a directory. The output directory is
- * created if it does not exist. This function does not support zip files
- * containing directories.
+ * Unzips all files of a zip file into individual buffers.
  *
  * @param {Buffer} inputBuffer
  * @returns {AsyncIterable<{ fileName: string, buffer: Buffer }>}
