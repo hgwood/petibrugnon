@@ -15,7 +15,7 @@ Then try:
 ```shell
 petibrugnon --help
 # or, for short
-ptbr --help
+tibru --help
 ```
 
 ## Usage
