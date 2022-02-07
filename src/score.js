@@ -2,7 +2,7 @@ import { fetchScoreboard } from "./codeJamApiClient.js";
 import env from "./env.js";
 import { login } from "./login.js";
 
-async function score() {
+export async function score() {
   if (!env.token) {
     await login();
   }
@@ -19,5 +19,3 @@ async function score() {
     );
   });
 }
-
-score().catch(console.error);

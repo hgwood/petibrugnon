@@ -8,7 +8,7 @@ import { zip } from "./utils/zip.js";
 import { login } from "./login.js";
 import { sleep } from "./utils/sleep.js";
 
-async function upload() {
+export async function upload() {
   if (!env.token) {
     await login();
   }
@@ -128,5 +128,3 @@ async function fetchJudgement(challengeId, attemptId) {
   }
   return judgement;
 }
-
-upload().catch(console.error);

@@ -68,5 +68,3 @@ function findTest(fileName, tests) {
     ({ name }) => name[0].toLowerCase() === fileName[0].toLowerCase()
   );
 }
-
-download().catch(console.error);

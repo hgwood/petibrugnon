@@ -1,6 +1,5 @@
 import env from "./env.js";
 import { buildOAuth2Client } from "./googleOAuth.js";
-import isMain from "./utils/isMain.js";
 
 export async function login() {
   const client = await buildOAuth2Client(
@@ -11,8 +10,4 @@ export async function login() {
     }
   );
   env.token = client.credentials.access_token;
-}
-
-if (isMain(import.meta)) {
-  login().catch(console.error);
 }
