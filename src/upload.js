@@ -1,12 +1,12 @@
 import { mkdir, readdir } from "fs/promises";
 import * as path from "path";
+import { setTimeout } from "timers/promises";
 import { inspect } from "util";
 import { fetchAttempts, uploadOutput } from "./codeJamApiClient.js";
 import env from "./env.js";
 import glob from "./wrappers/glob.js";
 import { zip } from "./utils/zip.js";
 import { login } from "./login.js";
-import { sleep } from "./utils/sleep.js";
 
 export async function upload() {
   if (!env.token) {
@@ -108,7 +108,7 @@ async function findAttemptId(challengeId, taskId, testId) {
     );
     attemptId = attempt?.id;
     i += 1;
-    await sleep(500);
+    await setTimeout(500);
   }
   return attemptId;
 }
@@ -124,7 +124,7 @@ async function fetchJudgement(challengeId, attemptId) {
     );
     judgement = attempt?.judgement;
     i += 1;
-    await sleep(2000);
+    await setTimeout(2000);
   }
   return judgement;
 }
