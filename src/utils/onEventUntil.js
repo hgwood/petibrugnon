@@ -7,6 +7,10 @@ import events from "events";
  * @param {events.EventEmitter} emitter
  * @param {string} eventName
  * @param {string} endEventName
+ * @returns {AsyncGenerator<any>}
+ *
+ * @example
+ * for await (const emitted of onEventUntil(emitter, "event", "end")) console.log(...emitted);
  */
 export async function* onEventUntil(emitter, eventName, endEventName) {
   const abort = new AbortController();
