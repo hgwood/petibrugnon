@@ -6,8 +6,12 @@ import env from "./env.js";
 import { findCurrentChallenge } from "./hashCode.js";
 import asyncToArray from "./utils/asyncToArray.js";
 import { unzip } from "./utils/unzip.js";
+import { login } from "./login.js";
 
 export async function download() {
+  if (!env.token) {
+    await login();
+  }
   const { adventures } = await fetchAdventures();
   const challengeId = findCurrentChallenge(adventures)?.id;
   if (!challengeId) {
