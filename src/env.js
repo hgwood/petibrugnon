@@ -71,7 +71,7 @@ function parseCredentialsFile() {
         )}' exists but cannot be parsed. You are now logged out.`
       );
     }
-    rmSync(credentialsFile);
+    rmSync(credentialsFile, { force: true });
     return null;
   }
 }
