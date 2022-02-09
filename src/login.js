@@ -4,7 +4,6 @@ import { buildOAuth2Client } from "./googleOAuth.js";
 export async function login() {
   const client = await buildOAuth2Client(
     "226377176553-eaf2qgjej4h7brmra79i2pvf5iir1r2s.apps.googleusercontent.com",
-    ["https://www.googleapis.com/auth/codejam"],
     {
       tokenCachePath: env.paths.credentials,
     }

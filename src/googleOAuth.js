@@ -20,14 +20,12 @@ import { OAuth2Client } from "google-auth-library";
  * @typedef {import("google-auth-library").Credentials} Credentials
  *
  * @param {string} clientId
- * @param {string[]} scopes permissions to ask the user for
  * @param {Object} options
  * @param {string} [options.tokenCachePath=token.json] path where the function can cache the token
  * @returns {Promise<OAuth2Client>}
  */
 export async function buildOAuth2Client(
   clientId,
-  scopes,
   { tokenCachePath = "token.json" } = {}
 ) {
   const oauth2Client = new OAuth2Client({
@@ -35,7 +33,7 @@ export async function buildOAuth2Client(
     redirectUri: "urn:ietf:wg:oauth:2.0:oob",
   });
   const token = await cacheUsingJsonFile(
-    () => acquireTokenUsingCliCode(oauth2Client, scopes),
+    () => acquireTokenUsingCliCode(oauth2Client),
     tokenCachePath
   );
   oauth2Client.credentials = token;
@@ -71,17 +69,28 @@ async function cacheUsingJsonFile(fn, path) {
 /**
  *
  * @param {OAuth2Client} oauth2Client
- * @param {string[]} scopes
  * @returns {Promise<Credentials>}
  */
-async function acquireTokenUsingCliCode(oauth2Client, scopes) {
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: scopes,
-  });
+async function acquireTokenUsingCliCode(oauth2Client) {
+  const authUrl = composeAuthUrl(oauth2Client._clientId);
   const code = await askForCodeThroughCli(authUrl);
   const { tokens } = await oauth2Client.getToken(code);
   return tokens;
+}
+
+/**
+ * See https://developers.google.com/identity/protocols/oauth2/native-app#step-2:-send-a-request-to-googles-oauth-2.0-server
+ * @param {string} clientId
+ * @returns {string}
+ */
+function composeAuthUrl(clientId) {
+  const query = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
+    response_type: "code",
+    scope: "https://www.googleapis.com/auth/codejam",
+  }).toString();
+  return `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
 }
 
 /**
