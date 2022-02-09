@@ -41,42 +41,6 @@ function parseIgnoreFiles() {
   }
 }
 
-function parseCredentialsFile() {
-  try {
-    const credentials = JSON.parse(readFileSync(credentialsFile).toString());
-    assert.ok(
-      credentials.expiry_date,
-      "expiry_date missing in credentials file"
-    );
-    assert.ok(
-      credentials.access_token,
-      "access_token missing in credentials file"
-    );
-    if (new Date() <= new Date(credentials.expiry_date)) {
-      console.log(`[petibrugnon] [INFO] Logged in using cached credentials`);
-      return credentials.access_token;
-    } else {
-      console.warn(
-        `[petibrugnon] [INFO] Credentials file at '${relative(
-          credentialsFile
-        )}' exists but token has expired. You are now logged out.`
-      );
-      rmSync(credentialsFile);
-      return null;
-    }
-  } catch (err) {
-    if (err.code !== "ENOENT") {
-      console.warn(
-        `[petibrugnon] [WARN] Credentials file at '${relative(
-          credentialsFile
-        )}' exists but cannot be parsed. You are now logged out.`
-      );
-    }
-    rmSync(credentialsFile, { force: true });
-    return null;
-  }
-}
-
 function relative(filePath) {
   return path.relative(projectDirectory, filePath);
 }
@@ -115,5 +79,4 @@ export default {
   inputToTestMapping: JSON.parse(
     readFileSync(inputToTestMappingFile).toString()
   ),
-  token: parseCredentialsFile(),
 };

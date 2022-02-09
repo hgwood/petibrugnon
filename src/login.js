@@ -1,12 +1,12 @@
 import env from "./env.js";
-import { authenticate } from "./googleOAuth.js";
+import { authorize } from "./googleOAuth2.js";
 
 export async function login() {
-  const accessToken = await authenticate(
+  const accessToken = await authorize(
     "226377176553-eaf2qgjej4h7brmra79i2pvf5iir1r2s.apps.googleusercontent.com",
     {
-      tokenCachePath: env.paths.credentials,
+      cacheFilePath: env.paths.credentials,
     }
   );
-  env.token = accessToken;
+  return accessToken;
 }

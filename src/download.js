@@ -9,15 +9,13 @@ import { unzip } from "./utils/unzip.js";
 import { login } from "./login.js";
 
 export async function download() {
-  if (!env.token) {
-    await login();
-  }
+  const accessToken = await login();
   const { adventures } = await fetchAdventures();
   const challengeId = findCurrentChallenge(adventures)?.id;
   if (!challengeId) {
     throw new Error(`No Hash Code challenge is currently opened.`);
   }
-  const { challenge } = await fetchChallenge(challengeId, env.token);
+  const { challenge } = await fetchChallenge(challengeId, accessToken);
   await writeFile(env.paths.meta, JSON.stringify(challenge, null, 2));
   const task = challenge.tasks[0];
   console.log(

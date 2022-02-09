@@ -3,10 +3,8 @@ import env from "./env.js";
 import { login } from "./login.js";
 
 export async function score() {
-  if (!env.token) {
-    await login();
-  }
-  const scoreboard = await fetchScoreboard(env.meta.challengeId, env.token);
+  const accessToken = await login();
+  const scoreboard = await fetchScoreboard(env.meta.challengeId, accessToken);
   const competitor = scoreboard.user_scores.find(
     ({ competitor }) => competitor.id === env.meta.competitorId
   );

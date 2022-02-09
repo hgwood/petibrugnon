@@ -9,9 +9,7 @@ import { zip } from "./utils/zip.js";
 import { login } from "./login.js";
 
 export async function upload() {
-  if (!env.token) {
-    await login();
-  }
+  const accessToken = await login();
   const sourceFiles = await glob("**", {
     ignore: [".petibrugnon/**"].concat(env.paths.ignore),
     cwd: env.paths.project,
@@ -45,13 +43,18 @@ export async function upload() {
       testId,
       path.resolve(env.paths.outputs, outputFileName),
       env.paths.sourcesZip,
-      env.token
+      accessToken
     );
     const logPath = path.join(env.paths.relative.outputs, outputFileName);
     console.log(
       `[petibrugnon] Uploaded output '${logPath}' for test '${env.meta.tests[testId].name}'`
     );
-    const attemptId = await findAttemptId(challengeId, taskId, testId);
+    const attemptId = await findAttemptId(
+      challengeId,
+      taskId,
+      testId,
+      accessToken
+    );
     if (attemptId) {
       attemptIds[testId] = attemptId;
     } else {
@@ -63,7 +66,8 @@ export async function upload() {
   console.log(`[petibrugnon] Awaiting judgement.`);
   const judgements = await Promise.all(
     attemptIds.map(
-      (attemptId) => attemptId && fetchJudgement(challengeId, attemptId)
+      (attemptId) =>
+        attemptId && fetchJudgement(challengeId, attemptId, accessToken)
     )
   );
   judgements.forEach((judgement, testId) => {
@@ -87,11 +91,19 @@ export async function upload() {
   });
 }
 
-async function findAttemptId(challengeId, taskId, testId) {
+/**
+ *
+ * @param {string} challengeId
+ * @param {string} taskId
+ * @param {number} testId
+ * @param {string} accessToken
+ * @returns {Promise<string>}
+ */
+async function findAttemptId(challengeId, taskId, testId, accessToken) {
   let i = 0;
   let attemptId = null;
   while (!attemptId && i <= 5) {
-    const attempts = await fetchAttempts(challengeId, env.token);
+    const attempts = await fetchAttempts(challengeId, accessToken);
     // NOTE: The most recent attempt that matches the test and the task, and
     // that hasn't been judged yet, is selected. This makes assumptions:
     //
@@ -114,11 +126,17 @@ async function findAttemptId(challengeId, taskId, testId) {
   return attemptId;
 }
 
-async function fetchJudgement(challengeId, attemptId) {
+/**
+ * @param {string} challengeId
+ * @param {string} attemptId
+ * @param {string} accessToken
+ * @returns {Promise<any>}
+ */
+async function fetchJudgement(challengeId, attemptId, accessToken) {
   let i = 0;
   let judgement = null;
   while (!judgement && i <= 15) {
-    const attempts = await fetchAttempts(challengeId, env.token);
+    const attempts = await fetchAttempts(challengeId, accessToken);
     const attempt = attempts.find(
       ({ id, judgement }) =>
         id === attemptId && judgement?.results[0].status__str === "FINAL"
