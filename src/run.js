@@ -18,6 +18,12 @@ export async function run(argv) {
   }
   await saveCommand(command);
   const inputFileNames = await readdir(env.paths.inputs);
+  if (inputFileNames.length === 0) {
+    console.error(
+      `[petibrugnon] There are no input files in '${env.paths.inputs}'.`
+    );
+    return;
+  }
   console.log(
     `[petibrugnon] Running '${command}' on ${
       inputFileNames.length
@@ -26,23 +32,39 @@ export async function run(argv) {
       breakLength: Infinity,
     })}`
   );
-  const commands = inputFileNames.map((inputFileName) => {
+  const inputs = inputFileNames.map((inputFileName) => {
     const testId = env.inputToTestMapping[inputFileName];
     const testName = env.meta.tests[testId].name;
     return {
-      command: command,
-      name: testName.padEnd(testNameMaxLength),
-      env: {
-        PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, inputFileName),
-        PETIBRUGNON_OUTPUT_FILE_PATH: path.join(
-          env.paths.outputs,
-          inputFileName
-        ),
-        PETIBRUGNON_TEST_ID: testId,
-        PETIBRUGNON_TEST_NAME: testName,
-      },
+      fileName: inputFileName,
+      testId,
+      testName,
     };
   });
+  const commands = inputs
+    .filter(
+      ({ testId }) => argv.only.length === 0 || argv.only.includes(testId)
+    )
+    .map(({ fileName, testId, testName }) => {
+      return {
+        command: command,
+        name: testName.padEnd(testNameMaxLength),
+        env: {
+          PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, fileName),
+          PETIBRUGNON_OUTPUT_FILE_PATH: path.join(env.paths.outputs, fileName),
+          PETIBRUGNON_TEST_ID: testId,
+          PETIBRUGNON_TEST_NAME: testName,
+        },
+      };
+    });
+  if (commands.length === 0) {
+    const availableTests = inputs.map(({ testId }) => testId).join(" ");
+    const selectedTests = argv.only.join(" ");
+    console.error(
+      `[petibrugnon] '--only ${selectedTests}' results in to tests running. Available tests are: ${availableTests}.`
+    );
+    return;
+  }
   await concurrently(commands, {
     prefix: "{time} [{name}]",
     prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],

@@ -50,7 +50,13 @@ yargs(process.argv.slice(2))
   .command(
     "run",
     "",
-    (yargs) => {},
+    (yargs) => {
+      yargs.option("only", {
+        describe: "Run only tests with the given IDs",
+        type: "array",
+        default: [],
+      });
+    },
     async (argv) => {
       await run(argv);
     }
