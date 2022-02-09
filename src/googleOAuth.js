@@ -1,10 +1,8 @@
 import * as readline from "readline";
 import * as fs from "fs/promises";
-import { OAuth2Client } from "google-auth-library";
+import { fetch } from "undici";
 
 /**
- * Returns an OAuth 2 client that can be used with Google APIs.
- *
  * This function is interactive and is meant to be used on a CLI.
  * It authenticate the client by generating an URL and displaying
  * it to the user, expecting them visit the URL to login into
@@ -17,27 +15,20 @@ import { OAuth2Client } from "google-auth-library";
  *
  * @see the code was adapted from {@link https://developers.google.com/admin-sdk/directory/v1/quickstart/nodejs|the Node.js Quickstart for the Directory API}
  *
- * @typedef {import("google-auth-library").Credentials} Credentials
- *
  * @param {string} clientId
  * @param {Object} options
  * @param {string} [options.tokenCachePath=token.json] path where the function can cache the token
- * @returns {Promise<OAuth2Client>}
+ * @returns {Promise<string>} the access token
  */
-export async function buildOAuth2Client(
+export async function authenticate(
   clientId,
   { tokenCachePath = "token.json" } = {}
 ) {
-  const oauth2Client = new OAuth2Client({
-    clientId,
-    redirectUri: "urn:ietf:wg:oauth:2.0:oob",
-  });
   const token = await cacheUsingJsonFile(
-    () => acquireTokenUsingCliCode(oauth2Client),
+    () => acquireTokenUsingCliCode(clientId),
     tokenCachePath
   );
-  oauth2Client.credentials = token;
-  return oauth2Client;
+  return token.access_token;
 }
 
 /**
@@ -68,13 +59,13 @@ async function cacheUsingJsonFile(fn, path) {
 
 /**
  *
- * @param {OAuth2Client} oauth2Client
- * @returns {Promise<Credentials>}
+ * @param {string} clientId
+ * @returns {Promise<any>}
  */
-async function acquireTokenUsingCliCode(oauth2Client) {
-  const authUrl = composeAuthUrl(oauth2Client._clientId);
+async function acquireTokenUsingCliCode(clientId) {
+  const authUrl = composeAuthUrl(clientId);
   const code = await askForCodeThroughCli(authUrl);
-  const { tokens } = await oauth2Client.getToken(code);
+  const tokens = await fetchToken(clientId, code);
   return tokens;
 }
 
@@ -91,6 +82,36 @@ function composeAuthUrl(clientId) {
     scope: "https://www.googleapis.com/auth/codejam",
   }).toString();
   return `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
+}
+
+/**
+ *
+ * @param {string} clientId
+ * @param {string} code
+ * @returns {Promise<any>}
+ */
+async function fetchToken(clientId, code) {
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: clientId,
+      code,
+      grant_type: "authorization_code",
+      redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
+    }),
+  });
+  /** @type {any} */
+  const json = await response.json();
+  if (json.error) {
+    throw new Error(
+      `Cannot fetch token from Google OAuth2 services: ${json.error_description} (${json.error})`
+    );
+  }
+  json.expiry_date = new Date(json.expires_in * 1000 + Date.now());
+  return json;
 }
 
 /**
