@@ -36,5 +36,6 @@ tibru --help
   spawned process is provided the following environment variables:
   `PETIBRUGNON_INPUT_FILE_PATH`, `PETIBRUGNON_OUTPUT_FILE_PATH`,
   `PETIBRUGNON_TEST_ID`, `PETIBRUGNON_TEST_NAME`.
+- `run`: runs the last command ran with `run -- command...`.
 - `login`: log in to the scoring app. This automatically done by commands that require it.
 - `logout`: log out of the scoring app. Use it if you encounter errors.
