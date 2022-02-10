@@ -1,7 +1,7 @@
-import { rm } from "fs/promises";
+import { revokeAuthorization } from "./authorization/authorize.js";
 import env from "./env.js";
 
 export async function logout() {
-  await rm(env.paths.credentials, { force: true });
+  await revokeAuthorization({ cacheFilePath: env.paths.credentials });
   console.log("[petibrugnon] [INFO] Logged out.");
 }

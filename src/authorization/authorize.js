@@ -41,6 +41,13 @@ export async function authorize(clientId, scope, { cacheFilePath }) {
 }
 
 /**
+ * @param {{ cacheFilePath: string }} options
+ */
+export async function revokeAuthorization({ cacheFilePath }) {
+  await jsonFile(cacheFilePath).clear();
+}
+
+/**
  *
  * @param {string} clientId
  * @param {string} scope

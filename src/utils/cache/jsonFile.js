@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, rm } from "fs/promises";
 
 /**
  * @param {string} filePath
@@ -16,6 +16,9 @@ export function jsonFile(filePath) {
     },
     async write(value) {
       await writeFile(filePath, JSON.stringify(value, null, 2));
+    },
+    async clear() {
+      await rm(filePath, { force: true });
     },
   };
 }
