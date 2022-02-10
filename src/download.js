@@ -35,7 +35,6 @@ export async function download() {
     );
   }
   const inputZipResponse = await fetch(inputZipUri);
-  await mkdir(env.paths.inputs, { recursive: true });
   const inputZipBuffer = Buffer.from(await inputZipResponse.arrayBuffer());
   console.log(`[petibrugnon] Downloaded input data sets`);
   const inputs = await asyncToArray(unzip(inputZipBuffer));
@@ -46,6 +45,7 @@ export async function download() {
     env.paths.inputToTestMapping,
     JSON.stringify(inputToTestMapping, null, 2)
   );
+  await mkdir(env.paths.inputs, { recursive: true });
   for (const { fileName, buffer } of inputs) {
     const inputPath = path.resolve(env.paths.inputs, fileName);
     await writeFile(inputPath, buffer);
