@@ -1,3 +1,4 @@
 node_modules/**
 .petibrugnon/**
 .env
+.petibrugnonrc.json

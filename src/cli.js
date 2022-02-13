@@ -52,7 +52,7 @@ yargs(process.argv.slice(2))
     "",
     (yargs) => {
       yargs.option("only", {
-        describe: "Run only tests with the given IDs",
+        description: "Run only tests with the given IDs",
         type: "array",
         default: [],
       });
@@ -62,5 +62,16 @@ yargs(process.argv.slice(2))
     }
   )
   .demandCommand()
+  .option("google-oauth-client-id", {
+    alias: "cid",
+    type: "string",
+    description:
+      "The ID of Google OAuth 2.0 client to use to authorize access to the Google Code Jam API.",
+    demandOption: true,
+  })
+  .option("config", {
+    default: ".petibrugnonrc.json",
+    config: true,
+  })
   .help()
   .parse();

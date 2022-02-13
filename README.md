@@ -18,6 +18,24 @@ petibrugnon --help
 tibru --help
 ```
 
+### Creating and configuring a Google OAuth 2.0 Client
+
+For petibrugnon to access your data on the Hash Code scoring app, you need to
+authorize it to do so. This requires a Google OAuth 2.0 Client. To create one,
+go to `console.cloud.google.com`, create a project, then go to APIs & Services >
+Credentials, click Create Credentials, select OAuth Client ID, then the mobile
+app type, and then copy the client ID. Finally, create a `.petibrugnonrc.json`
+file in your project directory with the following contents:
+
+
+```json
+{
+  "google-oauth-client-id": "<paste the client ID here>"
+}
+```
+
+You're ready to go!
+
 ## Usage
 
 ### Commands
@@ -39,3 +57,13 @@ tibru --help
 - `run`: runs the last command ran with `run -- command...`.
 - `login`: log in to the scoring app. This automatically done by commands that require it.
 - `logout`: log out of the scoring app. Use it if you encounter errors.
+
+### Global options
+
+- `--google-oauth-client-id` (or `--cid`): the ID of Google OAuth 2.0 client to
+  use to authorize access to the Google Code Jam API.
+
+### Config file
+
+If a `.petibrugnonrc.json` file exists, options will be read out from it.
+Command-line options overrides the ones find in the file.
