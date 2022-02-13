@@ -67,11 +67,11 @@ async function fetchCredentialsUsingCli(clientId, scope) {
  */
 async function askForCodeThroughCli(authUrl) {
   console.log(
-    "[petibrugnon] Authorize this program to access your Hash Code profile by visiting this url:\n",
+    "Authorize this program to access your Hash Code profile by visiting this url:\n",
     authUrl
   );
   const code = await askQuestionThroughCli(
-    "[petibrugnon] Enter the code from that page here: "
+    "Enter the code from that page here: "
   );
   return code;
 }

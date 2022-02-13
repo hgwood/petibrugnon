@@ -2,27 +2,24 @@ import { mkdir, readdir } from "fs/promises";
 import * as path from "path";
 import { setTimeout } from "timers/promises";
 import { inspect } from "util";
-import { fetchAttempts, uploadOutput } from "./codeJamApiClient.js";
-import env from "./env.js";
-import glob from "./wrappers/glob.js";
-import { zip } from "./utils/zip.js";
+import { fetchAttempts, uploadOutput } from "../codeJamApiClient.js";
+import env from "../env.js";
+import glob from "../wrappers/glob.js";
+import { zip } from "../utils/zip.js";
 import { login } from "./login.js";
 
-export async function upload() {
+export async function upload(argv, { logger }) {
   const accessToken = await login();
   const sourceFiles = await glob("**", {
     ignore: [".petibrugnon/**"].concat(env.paths.ignore),
     cwd: env.paths.project,
     nodir: true,
   });
-  console.log(
-    `[petibrugnon] Zipping ${sourceFiles.length} source files: ${inspect(
-      sourceFiles,
-      {
-        maxArrayLength: 3,
-        breakLength: Infinity,
-      }
-    )}`
+  logger.info(
+    `Zipping ${sourceFiles.length} source files: ${inspect(sourceFiles, {
+      maxArrayLength: 3,
+      breakLength: Infinity,
+    })}`
   );
   await zip(env.paths.project, sourceFiles, env.paths.sourcesZip);
   const { challengeId, taskId } = env.meta;
@@ -32,8 +29,8 @@ export async function upload() {
   for (const outputFileName of outputFileNames) {
     const testId = env.inputToTestMapping[outputFileName];
     if (testId === undefined) {
-      console.warn(
-        `[petibrugnon] [WARN] Cannot find a test matching the output file '${outputFileName}'. This file will not be uploaded.`
+      logger.warn(
+        `Cannot find a test matching the output file '${outputFileName}'. This file will not be uploaded.`
       );
       continue;
     }
@@ -46,8 +43,8 @@ export async function upload() {
       accessToken
     );
     const logPath = path.join(env.paths.relative.outputs, outputFileName);
-    console.log(
-      `[petibrugnon] Uploaded output '${logPath}' for test '${env.meta.tests[testId].name}'`
+    logger.info(
+      `Uploaded output '${logPath}' for test '${env.meta.tests[testId].name}'`
     );
     const attemptId = await findAttemptId(
       challengeId,
@@ -58,12 +55,12 @@ export async function upload() {
     if (attemptId) {
       attemptIds[testId] = attemptId;
     } else {
-      console.warn(
-        `[petibrugnon] [WARN] Cannot find the judgement for test '${env.meta.tests[testId].name}'.`
+      logger.warn(
+        `Cannot find the judgement for test '${env.meta.tests[testId].name}'`
       );
     }
   }
-  console.log(`[petibrugnon] Awaiting judgement.`);
+  logger.info(`Awaiting judgement`);
   const judgements = await Promise.all(
     attemptIds.map(
       (attemptId) =>
@@ -72,20 +69,20 @@ export async function upload() {
   );
   judgements.forEach((judgement, testId) => {
     if (!judgement) {
-      console.error(
-        `[petibrugnon] [WARN] Cannot find judgement for test '${env.meta.tests[testId].name}'.`
+      logger.error(
+        `Cannot find judgement for test '${env.meta.tests[testId].name}'.`
       );
     } else if (judgement.results[0].verdict__str === "CORRECT") {
-      console.log(
-        `[petibrugnon] Output for test '${env.meta.tests[testId].name}' is CORRECT. Score: ${judgement?.results[0].score}.`
+      logger.info(
+        `Output for test '${env.meta.tests[testId].name}' is CORRECT. Score: ${judgement?.results[0].score}.`
       );
     } else if (judgement.results[0].verdict__str === "WRONG_ANSWER") {
-      console.log(
-        `[petibrugnon] Output for test '${env.meta.tests[testId].name}' is INCORRECT. Message: '${judgement?.results[0].judge_output}'.`
+      logger.warn(
+        `Output for test '${env.meta.tests[testId].name}' is INCORRECT. Message: '${judgement?.results[0].judge_output}'.`
       );
     } else {
-      console.error(
-        `[petibrugnon] [WARN] Judgement for test '${env.meta.tests[testId].name}' is: '${judgement?.results[0].verdict__str}'.`
+      logger.warn(
+        `Unknown judgement value for test '${env.meta.tests[testId].name}': '${judgement?.results[0].verdict__str}'.`
       );
     }
   });

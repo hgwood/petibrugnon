@@ -1,14 +1,14 @@
 import { writeFile, mkdir } from "fs/promises";
 import * as path from "path";
 import { fetch } from "undici";
-import { fetchAdventures, fetchChallenge } from "./codeJamApiClient.js";
-import env from "./env.js";
-import { findCurrentChallenge } from "./hashCode.js";
-import asyncToArray from "./utils/asyncToArray.js";
-import { unzip } from "./utils/unzip.js";
+import { fetchAdventures, fetchChallenge } from "../codeJamApiClient.js";
+import env from "../env.js";
+import { findCurrentChallenge } from "../hashCode.js";
+import asyncToArray from "../utils/asyncToArray.js";
+import { unzip } from "../utils/unzip.js";
 import { login } from "./login.js";
 
-export async function download() {
+export async function download(argv, { logger }) {
   const accessToken = await login();
   const { adventures } = await fetchAdventures();
   const challengeId = findCurrentChallenge(adventures)?.id;
@@ -18,13 +18,11 @@ export async function download() {
   const { challenge } = await fetchChallenge(challengeId, accessToken);
   await writeFile(env.paths.meta, JSON.stringify(challenge, null, 2));
   const task = challenge.tasks[0];
-  console.log(
-    `[petibrugnon] Currently opened challenge is: '${challenge.title}' - '${task.title}'`
+  logger.info(
+    `Currently opened challenge is: '${challenge.title}' - '${task.title}'`
   );
   await writeFile(env.paths.statement, task.statement);
-  console.log(
-    `[petibrugnon] Downloaded statement to '${env.paths.relative.statement}'`
-  );
+  logger.info(`Downloaded statement to '${env.paths.relative.statement}'`);
   const [inputZipUri] =
     task.statement.match(
       /https:\/\/codejam\.googleapis\.com\/dashboard\/get_file\/.*?input_data\.zip\?dl=1/
@@ -36,7 +34,7 @@ export async function download() {
   }
   const inputZipResponse = await fetch(inputZipUri);
   const inputZipBuffer = Buffer.from(await inputZipResponse.arrayBuffer());
-  console.log(`[petibrugnon] Downloaded input data sets`);
+  logger.info(`Downloaded input data sets`);
   const inputs = await asyncToArray(unzip(inputZipBuffer));
   const inputToTestMapping = Object.fromEntries(
     inputs.map(({ fileName }) => [fileName, findTest(fileName, task.tests)])
@@ -50,8 +48,8 @@ export async function download() {
     const inputPath = path.resolve(env.paths.inputs, fileName);
     await writeFile(inputPath, buffer);
     const relativeInputPath = path.join(env.paths.relative.inputs, fileName);
-    console.log(
-      `[petibrugnon] Unzipped input of test '${
+    logger.info(
+      `Unzipped input of test '${
         env.meta.tests[inputToTestMapping[fileName]].name
       }' to '${relativeInputPath}'`
     );

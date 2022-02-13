@@ -1,5 +1,5 @@
-import env from "./env.js";
-import { authorize } from "./authorization/authorize.js";
+import env from "../env.js";
+import { authorize } from "../authorization/authorize.js";
 
 export async function login() {
   const accessToken = await authorize(

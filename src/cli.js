@@ -1,54 +1,15 @@
 #!/usr/bin/env node
 
 import yargs from "yargs";
-import { login } from "./login.js";
-import { logout } from "./logout.js";
-import { download } from "./download.js";
-import { upload } from "./upload.js";
-import { score } from "./score.js";
-import { run } from "./run.js";
+import * as commands from "./commands/commands.js";
+import { createRootLogger } from "./logger.js";
 
 yargs(process.argv.slice(2))
-  .command(
-    "login",
-    "",
-    (yargs) => {},
-    async (argv) => {
-      await login();
-    }
-  )
-  .command(
-    "logout",
-    "",
-    (yargs) => {},
-    async (argv) => {
-      await logout();
-    }
-  )
-  .command(
-    "download",
-    "",
-    (yargs) => {},
-    async (argv) => {
-      await download();
-    }
-  )
-  .command(
-    "upload",
-    "",
-    (yargs) => {},
-    async (argv) => {
-      await upload();
-    }
-  )
-  .command(
-    "score",
-    "",
-    (yargs) => {},
-    async (argv) => {
-      await score();
-    }
-  )
+  .command("login", "", (yargs) => {}, handleCommand)
+  .command("logout", "", (yargs) => {}, handleCommand)
+  .command("download", "", (yargs) => {}, handleCommand)
+  .command("upload", "", (yargs) => {}, handleCommand)
+  .command("score", "", (yargs) => {}, handleCommand)
   .command(
     "run",
     "",
@@ -59,9 +20,7 @@ yargs(process.argv.slice(2))
         default: [],
       });
     },
-    async (argv) => {
-      await run(argv);
-    }
+    handleCommand
   )
   .demandCommand()
   .option("google-oauth-client-id", {
@@ -71,11 +30,35 @@ yargs(process.argv.slice(2))
       "The ID of Google OAuth 2.0 client to use to authorize access to the Google Code Jam API.",
     demandOption: true,
   })
+  .option("log-level", {
+    alias: "ll",
+    type: "string",
+    default: "info",
+    choices: ["fatal", "error", "warn", "info", "debug", "trace", "silent"],
+    description:
+      "The minimum level of log messages to output to stdout. The log file is not affected.",
+  })
+  .option("log-file", {
+    alias: "lf",
+    type: "string",
+    default: ".petibrugnon/petibrugnon.log",
+    description: "The path to a file to write log messages to.",
+  })
   .option("config", {
     type: "string",
-    description: "The path to a configuration file that provides options. Use this to always run petibrugnon with consistent options.",
+    description:
+      "The path to a JSON configuration file that provides options. Use this to always run petibrugnon with the same options.",
     default: ".petibrugnonrc.json",
     config: true,
   })
   .help()
   .parse();
+
+async function handleCommand(argv) {
+  const logger = createRootLogger({ level: argv.logLevel, file: argv.logFile });
+  logger.debug(argv, "Starting with argv");
+  const {
+    _: [commandName],
+  } = argv;
+  await commands[commandName](argv, { logger });
+}

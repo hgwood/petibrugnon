@@ -2,9 +2,9 @@ import { readdir, readFile, writeFile } from "fs/promises";
 import * as path from "path";
 import { inspect } from "util";
 import concurrently from "concurrently";
-import env from "./env.js";
+import env from "../env.js";
 
-export async function run(argv) {
+export async function run(argv, { logger }) {
   const testNames = Object.values(env.meta.tests).map(({ name }) => name);
   const testNameMaxLength = testNames.reduce(
     (maxLength, name) => Math.max(maxLength, name.length),
@@ -19,18 +19,17 @@ export async function run(argv) {
   await saveCommand(command);
   const inputFileNames = await readdir(env.paths.inputs);
   if (inputFileNames.length === 0) {
-    console.error(
-      `[petibrugnon] There are no input files in '${env.paths.inputs}'.`
-    );
+    logger.error(`There are no input files in '${env.paths.inputs}'.`);
     return;
   }
-  console.log(
-    `[petibrugnon] Running '${command}' on ${
-      inputFileNames.length
-    } files: ${inspect(inputFileNames, {
-      maxArrayLength: 3,
-      breakLength: Infinity,
-    })}`
+  logger.info(
+    `Running '${command}' on ${inputFileNames.length} files: ${inspect(
+      inputFileNames,
+      {
+        maxArrayLength: 3,
+        breakLength: Infinity,
+      }
+    )}`
   );
   const inputs = inputFileNames.map((inputFileName) => {
     const testId = env.inputToTestMapping[inputFileName];
@@ -60,13 +59,13 @@ export async function run(argv) {
   if (commands.length === 0) {
     const availableTests = inputs.map(({ testId }) => testId).join(" ");
     const selectedTests = argv.only.join(" ");
-    console.error(
-      `[petibrugnon] '--only ${selectedTests}' results in to tests running. Available tests are: ${availableTests}.`
+    logger.error(
+      `'--only ${selectedTests}' results in to tests running. Available tests are: ${availableTests}.`
     );
     return;
   }
   await concurrently(commands, {
-    prefix: "{time} [{name}]",
+    prefix: "[{time}] ({name}):",
     prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
     timestampFormat: "HH:mm:ss.SSS",
   }).result;
