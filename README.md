@@ -7,7 +7,7 @@ A command-line interface to assist Google Hash Code participants. It can interac
 Requires Node.js 16.7.0 or higher.
 
 ```shell
-npm install --global https://github.com/hgwood/petibrugnon
+npm install --global petibrugnon
 ```
 
 Then try:
