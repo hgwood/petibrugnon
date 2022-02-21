@@ -22,6 +22,18 @@ yargs(process.argv.slice(2))
     },
     handleCommand
   )
+  .command(
+    "parse",
+    "",
+    (yargs) => {
+      yargs.option("schema", {
+        description: "The path to a Jolicitron schema file",
+        type: "string",
+        default: "jolicitron.json",
+      });
+    },
+    handleCommand
+  )
   .demandCommand()
   .option("google-oauth-client-id", {
     alias: "cid",

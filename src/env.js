@@ -1,7 +1,6 @@
-import { mkdirSync, readFileSync, rmSync } from "fs";
+import { mkdirSync, readFileSync } from "fs";
 import * as path from "path";
 import parseIgnoreFile from "parse-gitignore";
-import assert from "assert";
 
 const projectDirectory = path.resolve(".");
 const gitginoreFile = path.resolve(projectDirectory, ".gitignore");
@@ -13,6 +12,7 @@ const stashDirectory = path.resolve(projectDirectory, ".petibrugnon");
 const sourcesZipFile = path.resolve(stashDirectory, "sources.zip");
 const statementFile = path.resolve(stashDirectory, "statement.html");
 const inputsDirectory = path.resolve(stashDirectory, "inputs");
+const inputsJsonDirectory = path.resolve(stashDirectory, "inputs.json");
 const outputsDirectory = path.resolve(stashDirectory, "outputs");
 const metaFile = path.resolve(stashDirectory, "meta.json");
 const inputToTestMappingFile = path.resolve(
@@ -60,6 +60,7 @@ export default {
     sourcesZip: sourcesZipFile,
     statement: statementFile,
     inputs: inputsDirectory,
+    inputsJson: inputsJsonDirectory,
     outputs: outputsDirectory,
     meta: metaFile,
     inputToTestMapping: inputToTestMappingFile,
@@ -70,9 +71,13 @@ export default {
       sourcesZip: relative(sourcesZipFile),
       statement: relative(statementFile),
       inputs: relative(inputsDirectory),
+      inputsJson: relative(inputsJsonDirectory),
       outputs: relative(outputsDirectory),
       meta: relative(metaFile),
       credentials: relative(credentialsFile),
+      of(filePath) {
+        return relative(filePath);
+      },
     },
   },
   meta: {

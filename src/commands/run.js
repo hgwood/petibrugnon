@@ -50,6 +50,10 @@ export async function run(argv, { logger }) {
         name: testName.padEnd(testNameMaxLength),
         env: {
           PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, fileName),
+          PETIBRUGNON_INPUT_JSON_FILE_PATH: path.join(
+            env.paths.inputsJson,
+            fileName + ".json"
+          ),
           PETIBRUGNON_OUTPUT_FILE_PATH: path.join(env.paths.outputs, fileName),
           PETIBRUGNON_TEST_ID: testId,
           PETIBRUGNON_TEST_NAME: testName,
