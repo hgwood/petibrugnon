@@ -7,6 +7,8 @@
     "tibru": "src/cli.js"
   },
   "scripts": {
+    "start": "node src/cli.js",
+    "help": "npm start -- --help",
     "test:bin": "docker image build --quiet --file test/bin/bin.dockerfile .",
     "prettier": "prettier --ignore-unknown package.json tsconfig.json src/**",
     "prettier:write": "npm run prettier -- --write",
