@@ -16,4 +16,3 @@ export async function cached({ read, write }, { refresh, isStale }) {
 }
 
 export * from "./jsonFile.js";
-export * from "./perpetual.js";
