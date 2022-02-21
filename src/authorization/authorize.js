@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import * as readline from "readline";
+import { bold } from "colorette";
 import { cached, jsonFile } from "../utils/cache/cache.js";
 import {
   composeAuthUrl,
@@ -68,7 +69,7 @@ async function fetchCredentialsUsingCli(clientId, scope) {
 async function askForCodeThroughCli(authUrl) {
   console.log(
     "Authorize this program to access your Hash Code profile by visiting this url:\n",
-    authUrl
+    bold(authUrl)
   );
   const code = await askQuestionThroughCli(
     "Enter the code from that page here: "
