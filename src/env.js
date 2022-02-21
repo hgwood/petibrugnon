@@ -22,9 +22,14 @@ const inputToTestMappingFile = path.resolve(
 const credentialsFile = path.resolve(stashDirectory, "credentials.json");
 const runSaveFile = path.resolve(stashDirectory, "runSaveFile.sh");
 
-function parseMetaFile() {
+/**
+ *
+ * @param {string} filePath
+ * @returns {any}
+ */
+function parseFile(filePath) {
   try {
-    return JSON.parse(readFileSync(metaFile).toString());
+    return JSON.parse(readFileSync(filePath).toString());
   } catch (err) {
     return null;
   }
@@ -46,7 +51,7 @@ function relative(filePath) {
 }
 
 mkdirSync(stashDirectory, { recursive: true });
-const meta = parseMetaFile();
+const meta = parseFile(metaFile);
 
 export default {
   paths: {
@@ -76,7 +81,5 @@ export default {
     competitorId: meta?.ticket.competitor?.id,
     tests: meta?.tasks[0].tests,
   },
-  inputToTestMapping: JSON.parse(
-    readFileSync(inputToTestMappingFile).toString()
-  ),
+  inputToTestMapping: parseFile(inputToTestMappingFile),
 };
