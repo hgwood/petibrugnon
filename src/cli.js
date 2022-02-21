@@ -72,6 +72,8 @@ yargs(process.argv.slice(2))
     demandOption: true,
   })
   .option("config", {
+    type: "string",
+    description: "The path to a configuration file that provides options. Use this to always run petibrugnon with consistent options.",
     default: ".petibrugnonrc.json",
     config: true,
   })

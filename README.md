@@ -61,9 +61,6 @@ You're ready to go!
 ### Global options
 
 - `--google-oauth-client-id` (or `--cid`): the ID of Google OAuth 2.0 client to
-  use to authorize access to the Google Code Jam API.
-
-### Config file
-
-If a `.petibrugnonrc.json` file exists, options will be read out from it.
-Command-line options overrides the ones find in the file.
+  use to authorize access to the Google Code Jam API. **Required**.
+- `--config`: the path to a JSON config file from which to read options.
+  Defaults to `.petibrugnonrc.json`.
