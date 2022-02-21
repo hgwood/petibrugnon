@@ -49,10 +49,13 @@ You're ready to go!
   not used, a `.petibrugnonignore` file is also accepted. Also, the
   `.petibrugnon` directory is always ignored.
 - `score`: display the total score, rank, and individual test scores.
+- `parse`: use jolicitron to parse all inputs files.
+  - `--schema`: speficy the schema file to use. Default is `jolicitron.json`.
 - `run -- command...`: run the given command once for each input file. The
   spawned process is provided the following environment variables:
-  `PETIBRUGNON_INPUT_FILE_PATH`, `PETIBRUGNON_OUTPUT_FILE_PATH`,
-  `PETIBRUGNON_TEST_ID`, `PETIBRUGNON_TEST_NAME`.
+  `PETIBRUGNON_INPUT_FILE_PATH`, `PETIBRUGNON_INPUT_JSON_FILE_PATH` (output of
+  `parse`), `PETIBRUGNON_OUTPUT_FILE_PATH`, `PETIBRUGNON_TEST_ID`,
+  `PETIBRUGNON_TEST_NAME`.
   - `--only`: only run the given tests (comma-separated list of numbers starting
     from zero).
 - `run`: runs the last command ran with `run -- command...`.
