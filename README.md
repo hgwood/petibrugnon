@@ -27,7 +27,6 @@ Credentials, click Create Credentials, select OAuth Client ID, then the mobile
 app type, and then copy the client ID. Finally, create a `.petibrugnonrc.json`
 file in your project directory with the following contents:
 
-
 ```json
 {
   "google-oauth-client-id": "<paste the client ID here>"

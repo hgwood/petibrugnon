@@ -7,7 +7,10 @@
     "tibru": "src/cli.js"
   },
   "scripts": {
-    "test:bin": "docker image build --quiet --file test/bin/bin.dockerfile ."
+    "test:bin": "docker image build --quiet --file test/bin/bin.dockerfile .",
+    "prettier": "prettier --ignore-unknown package.json tsconfig.json src/**",
+    "prettier:write": "npm run prettier -- --write",
+    "prettier:check": "npm run prettier -- --check"
   },
   "devDependencies": {
     "@types/glob": "7.2.0",
