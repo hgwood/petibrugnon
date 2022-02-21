@@ -1,0 +1,6 @@
+**
+!src/
+!test/
+!package.json
+!package-lock.json
+!.npmignore
