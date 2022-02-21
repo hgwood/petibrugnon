@@ -25,7 +25,7 @@ export function composeAuthUrl(clientId, scope) {
     client_id: clientId,
     redirect_uri: REDIRECT_URI,
     response_type: "code",
-    scope
+    scope,
   }).toString();
   return `https://accounts.google.com/o/oauth2/v2/auth?${query}`;
 }
