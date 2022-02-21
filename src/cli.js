@@ -51,6 +51,7 @@ yargs(process.argv.slice(2))
     default: ".petibrugnonrc.json",
     config: true,
   })
+  .strict()
   .help()
   .parse();
 
@@ -60,5 +61,8 @@ async function handleCommand(argv) {
   const {
     _: [commandName],
   } = argv;
+  if (!commands[commandName]) {
+    throw new Error(`Command not implemented: ${commandName}`);
+  }
   await commands[commandName](argv, { logger });
 }
