@@ -64,6 +64,7 @@ yargs(process.argv.slice(2))
     config: true,
   })
   .strict()
+  .scriptName("petibrugnon")
   .help()
   .parse();
 
