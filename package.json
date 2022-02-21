@@ -1,6 +1,6 @@
 {
   "name": "petibrugnon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "bin": {
     "petibrugnon": "src/cli.js",
