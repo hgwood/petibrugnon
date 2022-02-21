@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import yargs from "yargs";
 import { login } from "./login.js";
 import { logout } from "./logout.js";
