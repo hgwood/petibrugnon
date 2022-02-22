@@ -2,6 +2,9 @@
   "name": "petibrugnon",
   "version": "1.0.3",
   "type": "module",
+  "engines": {
+    "node": ">=16.7"
+  },
   "bin": {
     "petibrugnon": "src/cli.js",
     "tibru": "src/cli.js"
