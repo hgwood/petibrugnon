@@ -1,15 +1,32 @@
+import { bold, green, red, magenta } from "colorette";
 import { mkdir, readdir } from "fs/promises";
 import * as path from "path";
 import { setTimeout } from "timers/promises";
 import { inspect } from "util";
-import { fetchAttempts, uploadOutput } from "../codeJamApiClient.js";
+import {
+  fetchAttempts,
+  fetchScoreboard,
+  uploadOutput,
+} from "../codeJamApiClient.js";
 import env from "../env.js";
 import glob from "../wrappers/glob.js";
 import { zip } from "../utils/zip.js";
 import { login } from "./login.js";
+import { findScores } from "../hashCode.js";
+
+const scoreDiffFormatter = new Intl.NumberFormat(undefined, {
+  signDisplay: "always",
+});
 
 export async function upload(argv, { logger }) {
   const accessToken = await login();
+  const scoreboardBefore = await fetchScoreboard(
+    env.meta.challengeId,
+    accessToken
+  );
+  const scoresBefore = findScores(scoreboardBefore, env.meta.competitorId, {
+    testNames: env.meta.tests.map(({ name }) => name),
+  });
   const sourceFiles = await glob("**", {
     ignore: [".petibrugnon/**", ".petibrugnonrc.json"].concat(env.paths.ignore),
     cwd: env.paths.project,
@@ -67,14 +84,49 @@ export async function upload(argv, { logger }) {
         attemptId && fetchJudgement(challengeId, attemptId, accessToken)
     )
   );
+  const scoreboardAfter = await fetchScoreboard(
+    env.meta.challengeId,
+    accessToken
+  );
+  const scoresAfter = findScores(scoreboardAfter, env.meta.competitorId, {
+    testNames: env.meta.tests.map(({ name }) => name),
+  });
+  const scoresDiff = {
+    totalScore: scoresAfter.totalScore - scoresBefore.totalScore,
+    rank: scoresAfter.rank - scoresBefore.rank,
+    tests: scoresAfter.tests.map((test, i) => ({
+      name: test.name,
+      score: test.score - scoresBefore.tests[i].score,
+    })),
+  };
+  const totalScoreDiff = scoreDiffFormatter.format(scoresDiff.totalScore);
+  const totalScoreColor = diffColor(scoresDiff.totalScore);
+  logger.info(
+    `Total score: ${bold(magenta(scoresAfter.totalScore))} (${totalScoreColor(
+      totalScoreDiff
+    )})`
+  );
+  const rankDiff = scoreDiffFormatter.format(scoresDiff.rank);
+  const rankColor = diffColor(scoresDiff.rank);
+  logger.info(
+    `Rank: ${bold(magenta(scoresAfter.rank))} (${rankColor(rankDiff)})`
+  );
   judgements.forEach((judgement, testId) => {
     if (!judgement) {
       logger.error(
         `Cannot find judgement for test '${env.meta.tests[testId].name}'.`
       );
     } else if (judgement.results[0].verdict__str === "CORRECT") {
+      const scoreDiff = scoreDiffFormatter.format(
+        scoresDiff.tests[testId].score
+      );
+      const color = diffColor(scoreDiff);
       logger.info(
-        `Output for test '${env.meta.tests[testId].name}' is CORRECT. Score: ${judgement?.results[0].score}.`
+        `Output for test '${
+          env.meta.tests[testId].name
+        }' is CORRECT. Score: ${bold(
+          magenta(judgement?.results[0].score)
+        )} (${color(scoreDiff)}).`
       );
     } else if (judgement.results[0].verdict__str === "WRONG_ANSWER") {
       logger.warn(
@@ -143,4 +195,14 @@ async function fetchJudgement(challengeId, attemptId, accessToken) {
     await setTimeout(2000);
   }
   return judgement;
+}
+
+function diffColor(scoreDiff) {
+  if (scoreDiff > 0) {
+    return green;
+  } else if (scoreDiff < 0) {
+    return red;
+  } else {
+    return (str) => str;
+  }
 }
