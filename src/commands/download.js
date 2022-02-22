@@ -50,7 +50,7 @@ export async function download(argv, { logger }) {
     const relativeInputPath = path.join(env.paths.relative.inputs, fileName);
     logger.info(
       `Unzipped input of test '${
-        env.meta.tests[inputToTestMapping[fileName]].name
+        challenge.tasks[0].tests[inputToTestMapping[fileName]].name
       }' to '${relativeInputPath}'`
     );
   }
