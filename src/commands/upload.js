@@ -11,7 +11,7 @@ import { login } from "./login.js";
 export async function upload(argv, { logger }) {
   const accessToken = await login();
   const sourceFiles = await glob("**", {
-    ignore: [".petibrugnon/**"].concat(env.paths.ignore),
+    ignore: [".petibrugnon/**", ".petibrugnonrc.json"].concat(env.paths.ignore),
     cwd: env.paths.project,
     nodir: true,
   });
