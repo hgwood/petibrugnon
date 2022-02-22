@@ -47,7 +47,9 @@ You're ready to go!
   All files and directories from the working directory will be zipped and
   uploaded, except those which match patterns found in `.gitignore`. If Git is
   not used, a `.petibrugnonignore` file is also accepted. Also, the
-  `.petibrugnon` directory is always ignored.
+  `.petibrugnon` directory and `.petibrugnonrc.json` are always ignored. After
+  upload, wait for the scores to settle and display them, along with the
+  difference between before and after the upload.
 - `score`: display the total score, rank, and individual test scores.
 - `parse`: use jolicitron to parse all inputs files.
   - `--schema`: speficy the schema file to use. Default is `jolicitron.json`.
