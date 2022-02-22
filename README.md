@@ -56,7 +56,7 @@ You're ready to go!
   `PETIBRUGNON_INPUT_FILE_PATH`, `PETIBRUGNON_INPUT_JSON_FILE_PATH` (output of
   `parse`), `PETIBRUGNON_OUTPUT_FILE_PATH`, `PETIBRUGNON_TEST_ID`,
   `PETIBRUGNON_TEST_NAME`.
-  - `--only`: only run the given tests (comma-separated list of numbers starting
+  - `--only`: only run the given tests (space-separated list of numbers starting
     from zero).
 - `run`: runs the last command ran with `run -- command...`.
 - `login`: log in to the scoring app. This is automatically done by commands that require it.
