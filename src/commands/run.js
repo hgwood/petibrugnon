@@ -16,6 +16,7 @@ import fs from "fs";
 import { pipeline } from "stream/promises";
 
 export async function run(argv, { logger }) {
+  await mkdir(env.paths.outputs, { recursive: true });
   const testNames = Object.values(env.meta.tests).map(({ name }) => name);
   const testNameMaxLength = testNames.reduce(
     (maxLength, name) => Math.max(maxLength, name.length),
