@@ -4,6 +4,7 @@ export function createRootLogger({ level, file }) {
   return pino({
     name: "petibrugnon",
     timestamp: pino.stdTimeFunctions.isoTime,
+    level: "trace",
     transport: {
       targets: [
         {
