@@ -3,6 +3,7 @@ import * as path from "path";
 import { inspect } from "util";
 import concurrently from "concurrently";
 import env from "../env.js";
+import fs from "fs";
 
 export async function run(argv, { logger }) {
   const testNames = Object.values(env.meta.tests).map(({ name }) => name);
@@ -45,16 +46,20 @@ export async function run(argv, { logger }) {
       ({ testId }) => argv.only.length === 0 || argv.only.includes(testId)
     )
     .map(({ fileName, testId, testName }) => {
+      const inputPath = path.join(env.paths.inputs, fileName);
+      const outputPath = path.join(env.paths.outputs, fileName);
       return {
         command: command,
         name: testName.padEnd(testNameMaxLength),
+        inputStream: fs.createReadStream(inputPath),
+        outputStream: fs.createWriteStream(outputPath),
         env: {
-          PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, fileName),
+          PETIBRUGNON_INPUT_FILE_PATH: inputPath,
           PETIBRUGNON_INPUT_JSON_FILE_PATH: path.join(
             env.paths.inputsJson,
             fileName + ".json"
           ),
-          PETIBRUGNON_OUTPUT_FILE_PATH: path.join(env.paths.outputs, fileName),
+          PETIBRUGNON_OUTPUT_FILE_PATH: outputPath,
           PETIBRUGNON_TEST_ID: testId,
           PETIBRUGNON_TEST_NAME: testName,
         },
