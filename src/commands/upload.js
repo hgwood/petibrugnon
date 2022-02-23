@@ -1,6 +1,6 @@
 import { bold, green, red, magenta } from "colorette";
 import { mkdir, readdir } from "fs/promises";
-import * as path from "path";
+import path from "path";
 import { setTimeout } from "timers/promises";
 import { inspect } from "util";
 import {
@@ -19,7 +19,7 @@ const scoreDiffFormatter = new Intl.NumberFormat(undefined, {
 });
 
 export async function upload(argv, { logger }) {
-  const accessToken = await login();
+  const accessToken = await login(argv, { logger });
   const scoreboardBefore = await fetchScoreboard(
     env.meta.challengeId,
     accessToken

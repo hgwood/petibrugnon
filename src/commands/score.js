@@ -4,8 +4,8 @@ import env from "../env.js";
 import { findScores } from "../hashCode.js";
 import { login } from "./login.js";
 
-export async function score() {
-  const accessToken = await login();
+export async function score(argv, { logger }) {
+  const accessToken = await login(argv, { logger });
   const scoreboard = await fetchScoreboard(env.meta.challengeId, accessToken);
   const { teamName, totalScore, rank, tests } = findScores(
     scoreboard,

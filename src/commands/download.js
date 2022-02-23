@@ -9,7 +9,7 @@ import { unzip } from "../utils/unzip.js";
 import { login } from "./login.js";
 
 export async function download(argv, { logger }) {
-  const accessToken = await login();
+  const accessToken = await login(argv, { logger });
   const { adventures } = await fetchAdventures();
   const challengeId = findCurrentChallenge(adventures)?.id;
   if (!challengeId) {
