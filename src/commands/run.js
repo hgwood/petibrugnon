@@ -4,6 +4,7 @@ import { inspect } from "util";
 import concurrently from "concurrently";
 import env from "../env.js";
 import fs from "fs";
+import { pipeline } from "stream/promises";
 
 export async function run(argv, { logger }) {
   const testNames = Object.values(env.meta.tests).map(({ name }) => name);
@@ -41,6 +42,8 @@ export async function run(argv, { logger }) {
       testName,
     };
   });
+  const outputPaths = [];
+  const inputPaths = [];
   const commands = inputs
     .filter(
       ({ testId }) => argv.only.length === 0 || argv.only.includes(testId)
@@ -48,11 +51,11 @@ export async function run(argv, { logger }) {
     .map(({ fileName, testId, testName }) => {
       const inputPath = path.join(env.paths.inputs, fileName);
       const outputPath = path.join(env.paths.outputs, fileName);
+      outputPaths.push(outputPath);
+      inputPaths.push(inputPath);
       return {
         command: command,
         name: testName.padEnd(testNameMaxLength),
-        inputStream: fs.createReadStream(inputPath),
-        outputStream: fs.createWriteStream(outputPath),
         env: {
           PETIBRUGNON_INPUT_FILE_PATH: inputPath,
           PETIBRUGNON_INPUT_JSON_FILE_PATH: path.join(
@@ -73,11 +76,35 @@ export async function run(argv, { logger }) {
     );
     return;
   }
-  await concurrently(commands, {
+  const runningConcurently = concurrently(commands, {
     prefix: "[{time}] ({name}):",
     prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
     timestampFormat: "HH:mm:ss.SSS",
-  }).result;
+    outputStream: fs.createWriteStream('/dev/null'),
+  });
+  runningConcurently.commands.forEach((command, index) => {
+    const outputStream = fs.createWriteStream(outputPaths[index])
+    const inputStream = fs.createReadStream(inputPaths[index])
+    pipeline(inputStream, command.stdin).catch(err => {
+      logger.error(`Error while input command: ${err}`)
+    });
+    command.stdout.subscribe((buffer)=> {
+      outputStream.write(buffer);
+    }, (err) => {
+      logger.error(`Error while output command: ${err}`);
+    });
+    command.stderr.subscribe((buffer)=> {
+      logger.error(buffer.toString());
+    }, (err) => {
+      logger.error(`Error while error command: ${err}`);
+    });
+    command.close.subscribe((closeEvent)=> {
+      outputStream.close();
+    }, (err) => {
+      logger.error(`Error while close command: ${err}`);
+    });
+  })
+  await runningConcurently.result;
 }
 
 async function restoreCommand() {
