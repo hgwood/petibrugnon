@@ -70,7 +70,7 @@ yargs(process.argv.slice(2))
 
 async function handleCommand(argv) {
   const logger = createRootLogger({ level: argv.logLevel, file: argv.logFile });
-  logger.debug(argv, "Starting with argv");
+  logger.debug({ argv }, "Starting");
   const {
     _: [commandName],
   } = argv;
