@@ -23,15 +23,19 @@ tibru --help
 For petibrugnon to access your data on the Hash Code scoring app, you need to
 authorize it to do so. This requires a Google OAuth 2.0 Client. To create one,
 go to `console.cloud.google.com`, create a project, then go to APIs & Services >
-Credentials, click Create Credentials, select OAuth Client ID, then the mobile
-app type, and then copy the client ID. Finally, create a `.petibrugnonrc.json`
-file in your project directory with the following contents:
+Credentials > Create Credentials > OAuth Client ID. Select the mobile app type,
+and then copy the client ID. Create a `.petibrugnonrc.json` file in your project
+directory with the following contents:
 
 ```json
 {
   "google-oauth-client-id": "<paste the client ID here>"
 }
 ```
+
+Finally, switch back to the Google Cloud Console and go to APIs & Services >
+OAuth Consent Screen. In the Test users section, add the users you want to allow
+logging in using your client (probably yourself and your team mates).
 
 You're ready to go!
 
