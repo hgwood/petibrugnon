@@ -67,6 +67,7 @@ export async function run(argv, { logger }) {
         command: command,
         name: testName.padEnd(testNameMaxLength),
         env: {
+          ...process.env,
           PETIBRUGNON_INPUT_FILE_PATH: inputPath,
           PETIBRUGNON_INPUT_JSON_FILE_PATH: path.join(
             env.paths.inputsJson,
