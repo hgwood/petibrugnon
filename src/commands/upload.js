@@ -96,7 +96,7 @@ export async function upload(argv, { logger }) {
     rank: scoresAfter.rank - scoresBefore.rank,
     tests: scoresAfter.tests.map((test, i) => ({
       name: test.name,
-      score: test.score - scoresBefore.tests[i].score,
+      score: test.score - (scoresBefore.tests[i]?.score ?? 0),
     })),
   };
   const totalScoreDiff = scoreDiffFormatter.format(scoresDiff.totalScore);
