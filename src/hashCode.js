@@ -18,14 +18,24 @@ export function findScores(scoreboard, competitorId, { testNames }) {
   const competitor = scoreboard.user_scores.find(
     ({ competitor }) => competitor.id === competitorId
   );
-  return {
-    teamName: competitor.displayname,
-    totalScore: competitor.score_1,
-    rank: competitor.rank,
-    tests: competitor.task_info[0].score_by_test.map((score, testId) => ({
-      id: testId,
-      name: testNames?.[testId],
-      score,
-    })),
-  };
+  if (competitor) {
+
+    return {
+      teamName: competitor.displayname,
+      totalScore: competitor.score_1,
+      rank: competitor.rank,
+      tests: competitor.task_info[0].score_by_test.map((score, testId) => ({
+        id: testId,
+        name: testNames?.[testId],
+        score,
+      })),
+    };
+  } else {
+    return {
+      teamName: "<unknown>",
+      totalScore: 0,
+      rank: 0,
+      tests: [],
+    }
+  }
 }
