@@ -6,7 +6,7 @@ import { login } from "./login.js";
 
 export async function score(argv, { logger }) {
   const accessToken = await login(argv, { logger });
-  const scoreboard = await fetchScoreboard(env.meta.challengeId, accessToken);
+  const scoreboard = await fetchScoreboard(env.meta.challengeId, env.meta.competitorId, accessToken);
   const { teamName, totalScore, rank, tests } = findScores(
     scoreboard,
     env.meta.competitorId,

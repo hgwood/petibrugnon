@@ -22,6 +22,7 @@ export async function upload(argv, { logger }) {
   const accessToken = await login(argv, { logger });
   const scoreboardBefore = await fetchScoreboard(
     env.meta.challengeId,
+    env.meta.competitorId,
     accessToken
   );
   const scoresBefore = findScores(scoreboardBefore, env.meta.competitorId, {
@@ -86,6 +87,7 @@ export async function upload(argv, { logger }) {
   );
   const scoreboardAfter = await fetchScoreboard(
     env.meta.challengeId,
+    env.meta.competitorId,
     accessToken
   );
   const scoresAfter = findScores(scoreboardAfter, env.meta.competitorId, {

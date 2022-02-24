@@ -41,13 +41,13 @@ export async function fetchAttempts(challengeId, accessToken) {
   return attempts;
 }
 
-export function fetchScoreboard(challengeId, accessToken) {
+export function fetchScoreboard(challengeId, competitorId, accessToken) {
   const query = encodeGetQuery({
-    min_rank: 1,
-    num_consecutive_users: 1,
+    competitor_id: competitorId,
+    scoreboard_page_size: 50,
   });
   return fetchJson(
-    `https://codejam.googleapis.com/scoreboard/${challengeId}/poll?${query}`,
+    `https://codejam.googleapis.com/scoreboard/${challengeId}/find?${query}`,
     {
       headers: {
         authorization: `Bearer ${accessToken}`,
