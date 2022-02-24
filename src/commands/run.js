@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import * as path from "path";
 import { inspect } from "util";
 import {
