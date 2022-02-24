@@ -10,7 +10,7 @@ import {
   LogExit,
   LogTimings,
   RestartProcess,
- } from "concurrently";
+} from "concurrently";
 import env from "../env.js";
 import fs from "fs";
 import { pipeline } from "stream/promises";
@@ -88,26 +88,30 @@ export async function run(argv, { logger }) {
   const concurrentlylogger = new ConcurentlyLogger({
     prefixFormat: "[{time}] ({name}):",
     timestampFormat: "HH:mm:ss.SSS",
-});
+  });
   await concurrently(commands, {
     logger: concurrentlylogger,
     outputStream: process.stdout,
     controllers: [
-        new LogError({ logger: concurrentlylogger }),
-        new LogExit({ logger: concurrentlylogger }),
-        new LogPetiBrugnonOutput({ logger: concurrentlylogger, outputPaths, inputPaths }),
-        new KillOnSignal({ process }),
-        new RestartProcess({
-          logger: concurrentlylogger,
-        }),
-        new KillOthers({
-          logger: concurrentlylogger,
-          conditions: undefined,
-        }),
-        new LogTimings({
-          logger: concurrentlylogger,
-          timestampFormat: "HH:mm:ss.SSS",
-        })
+      new LogError({ logger: concurrentlylogger }),
+      new LogExit({ logger: concurrentlylogger }),
+      new LogPetiBrugnonOutput({
+        logger: concurrentlylogger,
+        outputPaths,
+        inputPaths,
+      }),
+      new KillOnSignal({ process }),
+      new RestartProcess({
+        logger: concurrentlylogger,
+      }),
+      new KillOthers({
+        logger: concurrentlylogger,
+        conditions: undefined,
+      }),
+      new LogTimings({
+        logger: concurrentlylogger,
+        timestampFormat: "HH:mm:ss.SSS",
+      }),
     ],
     prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
   });
@@ -132,22 +136,31 @@ class LogPetiBrugnonOutput {
     this.inputPaths = options.inputPaths;
   }
   handle(commands) {
-      commands.forEach((command, index) => {
-        const outputStream = fs.createWriteStream(this.outputPaths[index])
-        const inputStream = fs.createReadStream(this.inputPaths[index])
-        command.stdout.subscribe(text => outputStream.write(text), (err) => {
+    commands.forEach((command, index) => {
+      const outputStream = fs.createWriteStream(this.outputPaths[index]);
+      const inputStream = fs.createReadStream(this.inputPaths[index]);
+      command.stdout.subscribe(
+        (text) => outputStream.write(text),
+        (err) => {
           this.logger.error(`Error while output command: ${err}`);
-        });
-        command.stderr.subscribe(text => this.logger.logCommandText(text.toString(), command), (err) => {
+        }
+      );
+      command.stderr.subscribe(
+        (text) => this.logger.logCommandText(text.toString(), command),
+        (err) => {
           this.logger.error(`Error while error command: ${err}`);
-        });
-        command.close.subscribe((closeEvent)=> {
+        }
+      );
+      command.close.subscribe(
+        (closeEvent) => {
           outputStream.close();
-          inputStream.close()
-        }, (err) => {
+          inputStream.close();
+        },
+        (err) => {
           this.logger.error(`Error while close command: ${err}`);
-        });
-      });
-      return { commands };
+        }
+      );
+    });
+    return { commands };
   }
-};
+}
