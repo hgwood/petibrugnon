@@ -138,13 +138,6 @@ class PetiBrugnonController {
   handle(commands) {
     commands.forEach((command, index) => {
       const outputStream = fs.createWriteStream(this.outputPaths[index]);
-      const inputStream = fs.createReadStream(this.inputPaths[index]);
-      pipeline(inputStream, command.stdin).catch((err) => {
-        this.logger.logCommandText(
-          `Error while input command: ${err}`,
-          command
-        );
-      });
       command.stdout.subscribe(
         (text) => outputStream.write(text),
         (err) => {
@@ -166,7 +159,6 @@ class PetiBrugnonController {
       command.close.subscribe(
         () => {
           outputStream.close();
-          inputStream.close();
         },
         (err) => {
           this.logger.logCommandText(
