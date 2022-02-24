@@ -95,7 +95,7 @@ export async function run(argv, { logger }) {
     controllers: [
       new LogError({ logger: concurrentlylogger }),
       new LogExit({ logger: concurrentlylogger }),
-      new LogPetiBrugnonOutput({
+      new PetiBrugnonController({
         logger: concurrentlylogger,
         outputPaths,
         inputPaths,
@@ -129,7 +129,7 @@ async function saveCommand(command) {
   await writeFile(env.paths.runSave, command);
 }
 
-class LogPetiBrugnonOutput {
+class PetiBrugnonController {
   constructor(options) {
     this.logger = options.logger;
     this.outputPaths = options.outputPaths;
@@ -139,25 +139,40 @@ class LogPetiBrugnonOutput {
     commands.forEach((command, index) => {
       const outputStream = fs.createWriteStream(this.outputPaths[index]);
       const inputStream = fs.createReadStream(this.inputPaths[index]);
+      pipeline(inputStream, command.stdin).catch((err) => {
+        this.logger.logCommandText(
+          `Error while input command: ${err}`,
+          command
+        );
+      });
       command.stdout.subscribe(
         (text) => outputStream.write(text),
         (err) => {
-          this.logger.error(`Error while output command: ${err}`);
+          this.logger.logCommandText(
+            `Error while output command: ${err}`,
+            command
+          );
         }
       );
       command.stderr.subscribe(
         (text) => this.logger.logCommandText(text.toString(), command),
         (err) => {
-          this.logger.error(`Error while error command: ${err}`);
+          this.logger.logCommandText(
+            `Error while error command: ${err}`,
+            command
+          );
         }
       );
       command.close.subscribe(
-        (closeEvent) => {
+        () => {
           outputStream.close();
           inputStream.close();
         },
         (err) => {
-          this.logger.error(`Error while close command: ${err}`);
+          this.logger.logCommandText(
+            `Error while close command: ${err}`,
+            command
+          );
         }
       );
     });
