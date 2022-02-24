@@ -13,7 +13,6 @@ import {
 } from "concurrently";
 import env from "../env.js";
 import fs from "fs";
-import { pipeline } from "stream/promises";
 
 export async function run(argv, { logger }) {
   await mkdir(env.paths.outputs, { recursive: true });
