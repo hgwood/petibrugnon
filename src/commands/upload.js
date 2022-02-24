@@ -109,7 +109,7 @@ export async function upload(argv, { logger }) {
     )})`
   );
   const rankDiff = scoreDiffFormatter.format(scoresDiff.rank);
-  const rankColor = diffColor(scoresDiff.rank);
+  const rankColor = rankDiffColor(scoresDiff.rank);
   logger.info(
     `Rank: ${bold(magenta(scoresAfter.rank))} (${rankColor(rankDiff)})`
   );
@@ -197,6 +197,16 @@ async function fetchJudgement(challengeId, attemptId, accessToken) {
     await setTimeout(2000);
   }
   return judgement;
+}
+
+function rankDiffColor(rankDiff) {
+  if (rankDiff > 0) {
+    return red;
+  } else if (rankDiff < 0) {
+    return green;
+  } else {
+    return (str) => str;
+  }
 }
 
 function diffColor(scoreDiff) {
