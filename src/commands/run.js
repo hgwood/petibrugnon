@@ -1,8 +1,19 @@
 import { readdir, readFile, writeFile } from "fs/promises";
 import * as path from "path";
 import { inspect } from "util";
-import concurrently from "concurrently";
+import {
+  concurrently,
+  Logger as ConcurentlyLogger,
+  KillOnSignal,
+  KillOthers,
+  LogError,
+  LogExit,
+  LogTimings,
+  RestartProcess,
+} from "concurrently";
 import env from "../env.js";
+import fs from "fs";
+import { pipeline } from "stream/promises";
 
 export async function run(argv, { logger }) {
   const testNames = Object.values(env.meta.tests).map(({ name }) => name);
@@ -40,21 +51,27 @@ export async function run(argv, { logger }) {
       testName,
     };
   });
+  const outputPaths = [];
+  const inputPaths = [];
   const commands = inputs
     .filter(
       ({ testId }) => argv.only.length === 0 || argv.only.includes(testId)
     )
     .map(({ fileName, testId, testName }) => {
+      const inputPath = path.join(env.paths.inputs, fileName);
+      const outputPath = path.join(env.paths.outputs, fileName);
+      outputPaths.push(outputPath);
+      inputPaths.push(inputPath);
       return {
         command: command,
         name: testName.padEnd(testNameMaxLength),
         env: {
-          PETIBRUGNON_INPUT_FILE_PATH: path.join(env.paths.inputs, fileName),
+          PETIBRUGNON_INPUT_FILE_PATH: inputPath,
           PETIBRUGNON_INPUT_JSON_FILE_PATH: path.join(
             env.paths.inputsJson,
             fileName + ".json"
           ),
-          PETIBRUGNON_OUTPUT_FILE_PATH: path.join(env.paths.outputs, fileName),
+          PETIBRUGNON_OUTPUT_FILE_PATH: outputPath,
           PETIBRUGNON_TEST_ID: testId,
           PETIBRUGNON_TEST_NAME: testName,
         },
@@ -68,11 +85,36 @@ export async function run(argv, { logger }) {
     );
     return;
   }
-  await concurrently(commands, {
-    prefix: "[{time}] ({name}):",
-    prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
+  const concurrentlylogger = new ConcurentlyLogger({
+    prefixFormat: "[{time}] ({name}):",
     timestampFormat: "HH:mm:ss.SSS",
-  }).result;
+  });
+  await concurrently(commands, {
+    logger: concurrentlylogger,
+    outputStream: process.stdout,
+    controllers: [
+      new LogError({ logger: concurrentlylogger }),
+      new LogExit({ logger: concurrentlylogger }),
+      new PetiBrugnonController({
+        logger: concurrentlylogger,
+        outputPaths,
+        inputPaths,
+      }),
+      new KillOnSignal({ process }),
+      new RestartProcess({
+        logger: concurrentlylogger,
+      }),
+      new KillOthers({
+        logger: concurrentlylogger,
+        conditions: undefined,
+      }),
+      new LogTimings({
+        logger: concurrentlylogger,
+        timestampFormat: "HH:mm:ss.SSS",
+      }),
+    ],
+    prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
+  });
 }
 
 async function restoreCommand() {
@@ -85,4 +127,47 @@ async function restoreCommand() {
 
 async function saveCommand(command) {
   await writeFile(env.paths.runSave, command);
+}
+
+class PetiBrugnonController {
+  constructor(options) {
+    this.logger = options.logger;
+    this.outputPaths = options.outputPaths;
+    this.inputPaths = options.inputPaths;
+  }
+  handle(commands) {
+    commands.forEach((command, index) => {
+      const outputStream = fs.createWriteStream(this.outputPaths[index]);
+      command.stdout.subscribe(
+        (text) => outputStream.write(text),
+        (err) => {
+          this.logger.logCommandText(
+            `Error while output command: ${err}`,
+            command
+          );
+        }
+      );
+      command.stderr.subscribe(
+        (text) => this.logger.logCommandText(text.toString(), command),
+        (err) => {
+          this.logger.logCommandText(
+            `Error while error command: ${err}`,
+            command
+          );
+        }
+      );
+      command.close.subscribe(
+        () => {
+          outputStream.close();
+        },
+        (err) => {
+          this.logger.logCommandText(
+            `Error while close command: ${err}`,
+            command
+          );
+        }
+      );
+    });
+    return { commands };
+  }
 }
