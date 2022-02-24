@@ -14,6 +14,8 @@ import { zip } from "../utils/zip.js";
 import { login } from "./login.js";
 import { findScores } from "../hashCode.js";
 
+const scoreFormatter = new Intl.NumberFormat(undefined, {});
+
 const scoreDiffFormatter = new Intl.NumberFormat(undefined, {
   signDisplay: "always",
 });
@@ -101,10 +103,11 @@ export async function upload(argv, { logger }) {
       score: test.score - (scoresBefore.tests[i]?.score ?? 0),
     })),
   };
+  const totalScore = scoreFormatter.format(scoresAfter.totalScore);
   const totalScoreDiff = scoreDiffFormatter.format(scoresDiff.totalScore);
   const totalScoreColor = diffColor(scoresDiff.totalScore);
   logger.info(
-    `Total score: ${bold(magenta(scoresAfter.totalScore))} (${totalScoreColor(
+    `Total score: ${bold(magenta(totalScore))} (${totalScoreColor(
       totalScoreDiff
     )})`
   );
@@ -119,6 +122,7 @@ export async function upload(argv, { logger }) {
         `Cannot find judgement for test '${env.meta.tests[testId].name}'.`
       );
     } else if (judgement.results[0].verdict__str === "CORRECT") {
+      const score = scoreFormatter.format(judgement?.results[0].score);
       const scoreDiff = scoreDiffFormatter.format(
         scoresDiff.tests[testId].score
       );
@@ -126,9 +130,7 @@ export async function upload(argv, { logger }) {
       logger.info(
         `Output for test '${
           env.meta.tests[testId].name
-        }' is CORRECT. Score: ${bold(
-          magenta(judgement?.results[0].score)
-        )} (${color(scoreDiff)}).`
+        }' is CORRECT. Score: ${bold(magenta(score))} (${color(scoreDiff)}).`
       );
     } else if (judgement.results[0].verdict__str === "WRONG_ANSWER") {
       logger.warn(
