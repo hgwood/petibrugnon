@@ -1,7 +1,16 @@
 import { readdir, readFile, writeFile } from "fs/promises";
 import * as path from "path";
 import { inspect } from "util";
-import concurrently from "concurrently";
+import {
+  concurrently,
+  Logger as ConcurentlyLogger,
+  KillOnSignal,
+  KillOthers,
+  LogError,
+  LogExit,
+  LogTimings,
+  RestartProcess,
+ } from "concurrently";
 import env from "../env.js";
 import fs from "fs";
 import { pipeline } from "stream/promises";
@@ -76,35 +85,32 @@ export async function run(argv, { logger }) {
     );
     return;
   }
-  const runningConcurently = concurrently(commands, {
-    prefix: "[{time}] ({name}):",
-    prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
+  const concurrentlylogger = new ConcurentlyLogger({
+    prefixFormat: "[{time}] ({name}):",
     timestampFormat: "HH:mm:ss.SSS",
-    outputStream: fs.createWriteStream('/dev/null'),
+});
+  await concurrently(commands, {
+    logger: concurrentlylogger,
+    outputStream: process.stdout,
+    controllers: [
+        new LogError({ logger: concurrentlylogger }),
+        new LogExit({ logger: concurrentlylogger }),
+        new LogPetiBrugnonOutput({ logger: concurrentlylogger, outputPaths, inputPaths }),
+        new KillOnSignal({ process }),
+        new RestartProcess({
+          logger: concurrentlylogger,
+        }),
+        new KillOthers({
+          logger: concurrentlylogger,
+          conditions: undefined,
+        }),
+        new LogTimings({
+          logger: concurrentlylogger,
+          timestampFormat: "HH:mm:ss.SSS",
+        })
+    ],
+    prefixColors: ["green", "yellow", "blue", "magenta", "cyan"],
   });
-  runningConcurently.commands.forEach((command, index) => {
-    const outputStream = fs.createWriteStream(outputPaths[index])
-    const inputStream = fs.createReadStream(inputPaths[index])
-    pipeline(inputStream, command.stdin).catch(err => {
-      logger.error(`Error while input command: ${err}`)
-    });
-    command.stdout.subscribe((buffer)=> {
-      outputStream.write(buffer);
-    }, (err) => {
-      logger.error(`Error while output command: ${err}`);
-    });
-    command.stderr.subscribe((buffer)=> {
-      logger.error(buffer.toString());
-    }, (err) => {
-      logger.error(`Error while error command: ${err}`);
-    });
-    command.close.subscribe((closeEvent)=> {
-      outputStream.close();
-    }, (err) => {
-      logger.error(`Error while close command: ${err}`);
-    });
-  })
-  await runningConcurently.result;
 }
 
 async function restoreCommand() {
@@ -118,3 +124,30 @@ async function restoreCommand() {
 async function saveCommand(command) {
   await writeFile(env.paths.runSave, command);
 }
+
+class LogPetiBrugnonOutput {
+  constructor(options) {
+    this.logger = options.logger;
+    this.outputPaths = options.outputPaths;
+    this.inputPaths = options.inputPaths;
+  }
+  handle(commands) {
+      commands.forEach((command, index) => {
+        const outputStream = fs.createWriteStream(this.outputPaths[index])
+        const inputStream = fs.createReadStream(this.inputPaths[index])
+        command.stdout.subscribe(text => outputStream.write(text), (err) => {
+          this.logger.error(`Error while output command: ${err}`);
+        });
+        command.stderr.subscribe(text => this.logger.logCommandText(text.toString(), command), (err) => {
+          this.logger.error(`Error while error command: ${err}`);
+        });
+        command.close.subscribe((closeEvent)=> {
+          outputStream.close();
+          inputStream.close()
+        }, (err) => {
+          this.logger.error(`Error while close command: ${err}`);
+        });
+      });
+      return { commands };
+  }
+};
