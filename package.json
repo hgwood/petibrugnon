@@ -1,6 +1,6 @@
 {
   "name": "petibrugnon",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "type": "module",
   "engines": {
     "node": ">=16.7"
